@@ -141,8 +141,8 @@
 
   /* TABLE VIEW */
   .tasks-table{background:var(--white);border:1px solid var(--border-light);border-radius:14px;overflow:hidden;box-shadow:var(--shadow-xs)}
-  .tt-row{display:grid;grid-template-columns:32px 1fr 110px 90px 110px 80px 60px;gap:14px;align-items:center;padding:13px 18px;border-bottom:1px solid var(--border-light);font-size:13px;cursor:pointer;transition:background .15s}
-  .tt-row.tt-head{background:var(--surface);font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);cursor:default}
+  .tt-row{display:grid;gap:14px;align-items:center;padding:13px 18px;border-bottom:1px solid var(--border-light);font-size:13px;cursor:pointer;transition:background .15s}
+  .tt-row.tt-head{background:var(--surface);font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);cursor:default;padding-top:0;padding-bottom:0}
   .tt-row.tt-head:hover{background:var(--surface)}
   .tt-row:hover{background:var(--surface-2)}
   .tt-row:last-child{border-bottom:none}
@@ -155,14 +155,39 @@
   .tt-pri.p4{background:var(--border-light)}
   .tt-title{font-weight:600;color:var(--text);line-height:1.3}
   .tt-meta{font-size:11px;color:var(--muted);font-weight:500}
-  .tt-status{display:inline-flex;padding:3px 8px;border-radius:5px;font-size:10px;font-weight:700;letter-spacing:.05em;text-transform:uppercase}
+  .tt-preview{font-size:11.5px;color:var(--muted);line-height:1.4;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+  .tt-status{display:inline-flex;padding:3px 8px;border-radius:5px;font-size:10px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;width:fit-content}
   .tt-status.todo{background:var(--blue-soft);color:var(--blue)}
   .tt-status.inprogress{background:#fff3e0;color:#b86a00}
   .tt-status.done{background:var(--green-soft);color:#1d6e3f}
   .tt-status.delegated{background:#ebebfc;color:#4a48b8}
-  .tt-people{display:flex;gap:-4px}
+  .tt-people{display:flex}
   .tt-people .avatar{width:22px;height:22px;border-radius:50%;background:var(--surface-3);border:1.5px solid var(--white);font-size:9px;font-weight:700;display:flex;align-items:center;justify-content:center;color:var(--text-2);margin-left:-6px}
   .tt-people .avatar:first-child{margin-left:0}
+  /* Sortable headers */
+  .tt-hdr{display:flex;align-items:center;gap:5px;cursor:pointer;user-select:none;padding:13px 0;transition:color .15s;position:relative}
+  .tt-hdr.sortable:hover{color:var(--text)}
+  .tt-hdr.locked{cursor:default}
+  .tt-hdr .sort-icon{display:inline-flex;width:11px;height:11px;opacity:0;transition:opacity .15s}
+  .tt-hdr.sortable:hover .sort-icon{opacity:.4}
+  .tt-hdr.active{color:var(--red)}
+  .tt-hdr.active .sort-icon{opacity:1;color:var(--red)}
+  .tt-hdr .col-hide{display:none;position:absolute;right:-4px;top:50%;transform:translateY(-50%);background:var(--white);border:1px solid var(--border);color:var(--muted);width:18px;height:18px;border-radius:50%;font-size:11px;align-items:center;justify-content:center;cursor:pointer;line-height:1}
+  .tt-hdr:hover .col-hide{display:flex}
+  .tt-hdr .col-hide:hover{color:var(--red);border-color:var(--red)}
+  .col-add-btn{padding:13px 14px;display:flex;align-items:center;justify-content:center;color:var(--muted);cursor:pointer;border-left:1px dashed var(--border-light);transition:all .15s}
+  .col-add-btn:hover{color:var(--red);background:var(--surface-2)}
+  .col-add-btn svg{width:14px;height:14px}
+  /* Column picker popover */
+  .col-picker{position:absolute;top:48px;right:8px;background:var(--white);border:1px solid var(--border-light);border-radius:12px;box-shadow:var(--shadow-lg);padding:8px;min-width:220px;z-index:150;display:none;max-height:380px;overflow-y:auto}
+  .col-picker.open{display:block}
+  .col-picker-head{padding:8px 12px 6px;font-size:10px;letter-spacing:.1em;font-weight:700;color:var(--muted);text-transform:uppercase}
+  .col-opt{display:flex;align-items:center;gap:10px;padding:8px 12px;border-radius:8px;font-size:13px;font-weight:500;color:var(--text);cursor:pointer;transition:background .12s}
+  .col-opt:hover{background:var(--surface)}
+  .col-opt input[type=checkbox]{width:16px;height:16px;accent-color:var(--red);cursor:pointer;margin:0}
+  .col-opt.locked{opacity:.5;cursor:not-allowed}
+  .col-opt-sep{height:1px;background:var(--border-light);margin:6px 4px}
+  .col-picker-foot{padding:6px 12px;font-size:11px;color:var(--muted);font-style:italic}
 
   /* EMPTY */
   .empty{padding:80px 20px;text-align:center;color:var(--muted);border:1px dashed var(--border);border-radius:18px;background:var(--surface-2)}
@@ -320,7 +345,8 @@
   .detail-status-row{display:flex;gap:6px;flex-wrap:wrap}
   .detail-actions-row{display:flex;gap:8px;flex-wrap:wrap}
 
-  /* DELEGATE MODAL */
+  /* DELEGATE MODAL — z-index above detail modal (300) so it shows on top */
+  #delegateModal{z-index:400}
   .delegate-prompt{width:100%;padding:16px;background:var(--surface);border:1px solid var(--border-light);border-radius:12px;font-family:'SF Mono','Monaco','Menlo',monospace;font-size:12.5px;color:var(--text);min-height:340px;resize:vertical;line-height:1.55;white-space:pre-wrap;font-weight:500;transition:all .2s}
   .delegate-prompt:focus{outline:none;border-color:var(--blue);box-shadow:0 0 0 3px rgba(0,40,104,.08)}
   .delegate-tips{font-size:12.5px;color:var(--muted);background:var(--blue-soft);padding:12px 14px;border-radius:10px;margin-bottom:14px;line-height:1.5}
@@ -588,6 +614,7 @@ const TASKS = [
 
 // ============ STATE ============
 const STATE_KEY = 'mm_command_deck_state_v3';
+const DEFAULT_TABLE_COLS = ['priority_dot','title','category','priority','due','people','status'];
 let state = {
   filter:{ cat:'all', status:'active' },
   sort:'priority',
@@ -595,7 +622,9 @@ let state = {
   view:'card',
   statusMap:{},
   customTasks:[],
-  enrichments:{}  // taskId → { people:[], attachments:[], log:[], titleOverride, ctaOverride, notesOverride, dueOverride, priorityOverride, catOverride }
+  enrichments:{},
+  tableColumns: DEFAULT_TABLE_COLS.slice(),
+  tableSort: { col:'priority', dir:'asc' }
 };
 try {
   const saved = JSON.parse(localStorage.getItem(STATE_KEY) || '{}');
@@ -603,7 +632,9 @@ try {
     filter:{ ...state.filter, ...(saved.filter||{}) },
     statusMap:saved.statusMap||{},
     customTasks:saved.customTasks||[],
-    enrichments:saved.enrichments||{} };
+    enrichments:saved.enrichments||{},
+    tableColumns: saved.tableColumns || DEFAULT_TABLE_COLS.slice(),
+    tableSort: saved.tableSort || { col:'priority', dir:'asc' } };
 } catch(e){}
 
 function allTasks() { return [...TASKS, ...(state.customTasks||[])]; }
@@ -719,14 +750,18 @@ function filteredTasks(){
 }
 function sortedTasks(list){
   const arr = [...list];
-  const sBy = state.sort;
+  // In table view, prefer the per-column tableSort over the global sort dropdown
+  const usingTable = state.view === 'table' && state.tableSort && state.tableSort.col;
+  const sBy = usingTable ? state.tableSort.col : state.sort;
+  const dir = usingTable ? (state.tableSort.dir === 'desc' ? -1 : 1) : 1;
   arr.sort((a,b)=>{
-    if (sBy === 'priority') return a.priority-b.priority || (a.due||'9').localeCompare(b.due||'9');
-    if (sBy === 'due') return (a.due||'9').localeCompare(b.due||'9') || a.priority-b.priority;
-    if (sBy === 'category') return a.catLabel.localeCompare(b.catLabel) || a.priority-b.priority;
-    if (sBy === 'status') { const o={inprogress:0,delegated:1,todo:2,done:3}; return o[getStatus(a)]-o[getStatus(b)] || a.priority-b.priority; }
-    if (sBy === 'title') return a.title.localeCompare(b.title);
-    return 0;
+    let r = 0;
+    if (sBy === 'priority') r = a.priority-b.priority || (a.due||'9').localeCompare(b.due||'9');
+    else if (sBy === 'due') r = (a.due||'9').localeCompare(b.due||'9') || a.priority-b.priority;
+    else if (sBy === 'category') r = a.catLabel.localeCompare(b.catLabel) || a.priority-b.priority;
+    else if (sBy === 'status') { const o={inprogress:0,delegated:1,todo:2,done:3}; r = o[getStatus(a)]-o[getStatus(b)] || a.priority-b.priority; }
+    else if (sBy === 'title') r = a.title.localeCompare(b.title);
+    return r * dir;
   });
   return arr;
 }
@@ -810,33 +845,87 @@ function renderGrid(list){
   }).join('') + `</div>`;
 }
 
+// ============ TABLE COLUMN DEFINITIONS ============
+const TABLE_COLUMNS = {
+  priority_dot: { label:'', width:'24px', sortKey:'priority', locked:true,
+    cell: t => `<span class="tt-pri p${t.priority}"></span>` },
+  title: { label:'Task', width:'1fr', sortKey:'title', locked:true,
+    cell: t => `<div class="tt-title">${escapeHtml(t.title)}</div>` },
+  category: { label:'Category', width:'110px', sortKey:'category',
+    cell: t => `<span class="badge cat ${t.cat}">${escapeHtml(t.catLabel)}</span>` },
+  priority: { label:'Priority', width:'90px', sortKey:'priority',
+    cell: t => `<span class="badge pri-${t.priority}">${priorityLabel(t.priority)}</span>` },
+  due: { label:'Due', width:'110px', sortKey:'due',
+    cell: t => `<span class="tt-meta ${dueClass(t.due)}">${t.due ? fmtDue(t.due) : '—'}</span>` },
+  people: { label:'People', width:'90px',
+    cell: t => {
+      const ppl = (t.people||[]).slice(0,3).map(p => `<span class="avatar" title="${escapeHtml(p.name+' — '+(p.role||''))}">${initials(p.name)}</span>`).join('');
+      const more = (t.people||[]).length > 3 ? `<span class="avatar" style="background:var(--text);color:#fff">+${(t.people.length-3)}</span>` : '';
+      return `<div class="tt-people">${ppl}${more || (!(t.people||[]).length ? '<span class="tt-meta">—</span>' : '')}</div>`;
+    }},
+  status: { label:'Status', width:'90px', sortKey:'status',
+    cell: t => { const s=getStatus(t); return `<span class="tt-status ${s}">${s==='inprogress'?'In Prog':s==='delegated'?'Delegated':s}</span>`; }},
+  attachments: { label:'Files', width:'60px',
+    cell: t => { const n=(t.attachments||[]).length; return `<span class="tt-meta">${n||'—'}</span>`; }},
+  activity: { label:'Log', width:'60px',
+    cell: t => { const n=(t.log||[]).length; return `<span class="tt-meta">${n||'—'}</span>`; }},
+  notes: { label:'Notes', width:'220px',
+    cell: t => `<div class="tt-preview">${escapeHtml(t.notes||'—')}</div>` },
+  cta: { label:'CTA', width:'260px',
+    cell: t => `<div class="tt-preview">${escapeHtml(t.cta||'—')}</div>` }
+};
+
+function getActiveColumns() {
+  // Filter to only valid + ensure locked columns are present
+  let cols = (state.tableColumns||DEFAULT_TABLE_COLS).filter(c => TABLE_COLUMNS[c]);
+  Object.keys(TABLE_COLUMNS).forEach(k => { if (TABLE_COLUMNS[k].locked && !cols.includes(k)) cols.unshift(k); });
+  return cols;
+}
+
 function renderTable(list){
+  const cols = getActiveColumns();
+  const colWidths = cols.map(c => TABLE_COLUMNS[c].width).join(' ') + ' 44px';
+  const headerCells = cols.map(c => {
+    const def = TABLE_COLUMNS[c];
+    const sortable = !!def.sortKey;
+    const active = state.tableSort && state.tableSort.col === def.sortKey;
+    const dir = active ? state.tableSort.dir : 'asc';
+    const arrow = dir === 'asc'
+      ? '<svg class="sort-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" d="M5 15l7-7 7 7"/></svg>'
+      : '<svg class="sort-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" d="M19 9l-7 7-7-7"/></svg>';
+    const hideBtn = def.locked ? '' : `<button class="col-hide" data-act="hide-col" data-col="${c}" title="Hide column">&#10005;</button>`;
+    return `<div class="tt-hdr ${sortable?'sortable':'locked'} ${active?'active':''}" data-act="${sortable?'sort-col':''}" data-sortkey="${def.sortKey||''}">
+      ${def.label}${sortable?arrow:''}${hideBtn}
+    </div>`;
+  }).join('');
   const rows = list.map(t => {
     const status = getStatus(t);
-    const ppl = (t.people||[]).slice(0,3).map(p => `<span class="avatar" title="${escapeHtml(p.name)}">${initials(p.name)}</span>`).join('');
-    const more = (t.people||[]).length > 3 ? `<span class="avatar" style="background:var(--text);color:#fff">+${(t.people.length-3)}</span>` : '';
-    return `
-      <div class="tt-row ${status==='done'?'done':''}" data-id="${t.id}" data-open="1">
-        <span class="tt-pri p${t.priority}"></span>
-        <div class="tt-title">${escapeHtml(t.title)}</div>
-        <span class="badge cat ${t.cat}">${escapeHtml(t.catLabel)}</span>
-        <span class="badge pri-${t.priority}">${priorityLabel(t.priority)}</span>
-        <span class="tt-meta">${t.due ? fmtDue(t.due) : '—'}</span>
-        <div class="tt-people">${ppl}${more}</div>
-        <span class="tt-status ${status}">${status==='inprogress'?'In Prog':status==='delegated'?'Delegated':status}</span>
-      </div>`;
-  }).join('');
-  return `<div class="tasks-table">
-    <div class="tt-row tt-head">
+    const cells = cols.map(c => TABLE_COLUMNS[c].cell(t)).join('');
+    return `<div class="tt-row ${status==='done'?'done':''}" data-id="${t.id}" data-open="1" style="grid-template-columns:${colWidths}">
+      ${cells}
       <span></span>
-      <span>Task</span>
-      <span>Category</span>
-      <span>Priority</span>
-      <span>Due</span>
-      <span>People</span>
-      <span>Status</span>
+    </div>`;
+  }).join('');
+  return `<div class="tasks-table" style="position:relative">
+    <div class="tt-row tt-head" style="grid-template-columns:${colWidths}">
+      ${headerCells}
+      <div class="col-add-btn" data-act="open-col-picker" title="Add column">
+        <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" d="M12 5v14m-7-7h14"/></svg>
+      </div>
     </div>
     ${rows}
+    <div class="col-picker" id="colPicker">
+      <div class="col-picker-head">Columns</div>
+      ${Object.entries(TABLE_COLUMNS).map(([k,def]) => {
+        const visible = cols.includes(k);
+        return `<label class="col-opt ${def.locked?'locked':''}">
+          <input type="checkbox" ${visible?'checked':''} ${def.locked?'disabled':''} data-col="${k}" data-act="toggle-col">
+          <span>${def.label || k.replace(/_/g,' ').replace(/^./, c => c.toUpperCase())}</span>
+        </label>`;
+      }).join('')}
+      <div class="col-opt-sep"></div>
+      <div class="col-picker-foot">Click any header to sort.</div>
+    </div>
   </div>`;
 }
 
@@ -844,9 +933,55 @@ function renderAll(){ renderStats(); renderChipCounts(); renderTaskList(); }
 
 // ============ TASK CARD CLICKS ============
 document.getElementById('taskContainer').addEventListener('click', e => {
+  // Column hide button
+  const hideBtn = e.target.closest('[data-act="hide-col"]');
+  if (hideBtn) {
+    e.stopPropagation();
+    const colKey = hideBtn.dataset.col;
+    state.tableColumns = (state.tableColumns||DEFAULT_TABLE_COLS).filter(c => c !== colKey);
+    persist(); renderTaskList();
+    return;
+  }
+  // Column picker toggle
+  const addColBtn = e.target.closest('[data-act="open-col-picker"]');
+  if (addColBtn) {
+    e.stopPropagation();
+    const picker = document.getElementById('colPicker');
+    if (picker) picker.classList.toggle('open');
+    return;
+  }
+  // Sort by column header
+  const sortHdr = e.target.closest('[data-act="sort-col"]');
+  if (sortHdr) {
+    e.stopPropagation();
+    const key = sortHdr.dataset.sortkey;
+    if (!key) return;
+    if (state.tableSort && state.tableSort.col === key) {
+      state.tableSort = { col:key, dir: state.tableSort.dir === 'asc' ? 'desc' : 'asc' };
+    } else {
+      state.tableSort = { col:key, dir:'asc' };
+    }
+    persist(); renderTaskList();
+    return;
+  }
+  // Column visibility toggle (checkbox in picker)
+  const colToggle = e.target.closest('[data-act="toggle-col"]');
+  if (colToggle) {
+    e.stopPropagation();
+    const key = colToggle.dataset.col;
+    let cols = (state.tableColumns||DEFAULT_TABLE_COLS).slice();
+    if (colToggle.checked) {
+      if (!cols.includes(key)) cols.push(key);
+    } else {
+      cols = cols.filter(c => c !== key);
+    }
+    state.tableColumns = cols;
+    persist(); renderTaskList();
+    return;
+  }
   // Quick status buttons on card view
   const statusBtn = e.target.closest('.btn');
-  if (statusBtn && statusBtn.dataset.act) {
+  if (statusBtn && statusBtn.dataset.act && ['todo','inprogress','done','delegated'].includes(statusBtn.dataset.act)) {
     e.stopPropagation();
     const card = statusBtn.closest('.task'); if (!card) return;
     setStatus(card.dataset.id, statusBtn.dataset.act);
@@ -856,6 +991,13 @@ document.getElementById('taskContainer').addEventListener('click', e => {
   // Otherwise open detail
   const openTarget = e.target.closest('[data-open="1"]');
   if (openTarget) openDetail(openTarget.dataset.id);
+});
+// Close column picker when clicking elsewhere
+document.addEventListener('click', e => {
+  const picker = document.getElementById('colPicker');
+  if (!picker || !picker.classList.contains('open')) return;
+  if (e.target.closest('#colPicker') || e.target.closest('[data-act="open-col-picker"]')) return;
+  picker.classList.remove('open');
 });
 
 // ============ SEARCH / SORT / FILTER ============
@@ -1304,13 +1446,21 @@ document.getElementById('delegateCopy').addEventListener('click', async () => {
 });
 document.getElementById('delegateSend').addEventListener('click', async () => {
   const text = document.getElementById('delegatePrompt').value;
+  // Copy as belt-and-braces (in case URL paste doesn't autosubmit)
   const ok = await copyToClipboard(text);
-  // Log the delegation
-  addLog(activeDetailId, 'system', 'Delegated to Claude — prompt copied to clipboard, claude.ai opened in new tab. Paste Claude\'s reply here when it lands.');
+  // Open Claude with the prompt prefilled via the q= URL parameter
+  // (claude.ai/new?q=… auto-pastes into the input on the new conversation)
+  const url = 'https://claude.ai/new?q=' + encodeURIComponent(text);
+  const win = window.open(url, '_blank');
+  // Log delegation + flip status
+  addLog(activeDetailId, 'system', 'Delegated to Claude — prompt auto-pasted in new tab, also copied to clipboard as backup. Paste Claude\'s reply in Activity when it lands.');
   setStatus(activeDetailId, 'delegated');
   document.getElementById('delegateModal').classList.remove('open');
-  window.open('https://claude.ai/new', '_blank');
-  toast(ok ? 'Copied. Paste in Claude — reply lands back here.' : 'Open failed — copy and try again');
+  if (!win) {
+    toast('Popup blocked — prompt is on your clipboard. Open Claude and paste.');
+  } else {
+    toast(ok ? 'Prompt auto-pasted in Claude (also on clipboard).' : 'Tab opened — paste from clipboard if needed.');
+  }
   renderDetail();
 });
 
@@ -1339,115 +1489,4 @@ function parseBrainDump(text){
   if (/\btoday\b/i.test(text)) t.due = isoFromDate(today);
   else if (/\btomorrow\b/i.test(text)) t.due = isoFromDate(addDays(today,1));
   if (!t.due) { const m = text.match(/\bin\s+(\d+)\s+(day|days|week|weeks)\b/i); if (m) { const n = parseInt(m[1]) * (m[2].startsWith('week')?7:1); t.due = isoFromDate(addDays(today,n)); } }
-  if (!t.due) { const m = lower.match(/\b(this|next)?\s*(sunday|monday|tuesday|wednesday|thursday|friday|saturday)\b/); if (m) { const target=dayNames.indexOf(m[2]); const cur=today.getDay(); let diff=(target-cur+7)%7; if (diff===0) diff=7; if (m[1]==='next') diff+=7; t.due = isoFromDate(addDays(today,diff)); } }
-  if (!t.due) { const m = lower.match(new RegExp(`\\b(${monthNames.join('|')})\\s+(\\d{1,2})(st|nd|rd|th)?\\b`)); if (m) { const month=monthNames.indexOf(m[1]); const day=parseInt(m[2]); const d=new Date(today.getFullYear(),month,day); if (d<today) d.setFullYear(d.getFullYear()+1); t.due = isoFromDate(d); } }
-  if (!t.due) { const m = text.match(/\b(?:on\s+the\s+|by\s+the\s+)(\d{1,2})(st|nd|rd|th)?\b/i); if (m) { const day=parseInt(m[1]); const d=new Date(today.getFullYear(),today.getMonth(),day); if (d<today) d.setMonth(d.getMonth()+1); t.due = isoFromDate(d); } }
-  let title = text.trim().replace(/\s+/g,' ').replace(/^(i\s+(?:need|have|want|got|gotta|should)\s+to\s+|need\s+to\s+|got\s+to\s+|gotta\s+|please\s+|remind\s+me\s+to\s+|todo[:\s]+|to-do[:\s]+)/i,'');
-  title = title.charAt(0).toUpperCase() + title.slice(1);
-  if (title.length > 140) title = title.substring(0,137)+'...';
-  t.title = title;
-  if (/refund|chargeback|dispute/i.test(text)) t.cta = 'Pull the transaction record → contact support with proof → request refund → if denied, escalate to A-Z claim or credit-card chargeback';
-  else if (/mortgage|invoice|bill\b|payment|zelle|wire/i.test(text)) t.cta = 'Open the payment portal → submit payment → screenshot the confirmation';
-  else if (/text\b|sms|message\b/i.test(text)) t.cta = 'Draft a tight message → send → log in CRM and set the next checkpoint';
-  else if (/\bcall\b|phone/i.test(text)) t.cta = 'Dial now → take notes → set the follow-up before you hang up';
-  else if (/schedule|book\b|appointment|meeting/i.test(text)) t.cta = 'Propose 2-3 time options → confirm → send calendar invite with agenda';
-  else if (/email\b/i.test(text)) t.cta = 'Draft → tighten the ask → send → log the reply expectation';
-  else if (/audit|review|check\b|qa\b/i.test(text)) t.cta = 'Walk through end-to-end → log findings + gaps → assign the next concrete step';
-  else if (/build|finish|complete|deploy|ship/i.test(text)) t.cta = 'Resume the build → finish the next milestone → ship and verify in production';
-  else if (/test\b/i.test(text)) t.cta = 'Walk the full flow → log bugs and edge cases → flag pass/fail with screenshots';
-  else if (/follow.?up/i.test(text)) t.cta = 'Pull the last contact thread → send the follow-up → log the next checkpoint';
-  else if (/translate/i.test(text)) t.cta = 'Translate in native register → preserve brand spelling (BRiX, Loren AI) → format for the target audience';
-  else t.cta = 'Break this into 2-3 concrete next steps → execute the first one today → set a checkpoint for the rest';
-  return t;
-}
-
-// ============ BRAIN DUMP MODAL ============
-let parsed = null;
-const modalBackdrop = document.getElementById('modalBackdrop');
-const brainInput = document.getElementById('brainInput');
-const previewArea = document.getElementById('previewArea');
-function openModal(){ modalBackdrop.classList.add('open'); setTimeout(() => brainInput.focus(), 50); }
-function closeModal(){ modalBackdrop.classList.remove('open'); brainInput.value=''; previewArea.innerHTML=''; parsed=null; const mic=document.getElementById('micBtn'); if (mic.classList.contains('recording') && recognition) { try{recognition.stop();}catch(e){} mic.classList.remove('recording'); } }
-function renderPreview(){
-  const catOptions = [['money','Money'],['loren','Loren AI'],['brix','BRiX'],['mtip','MTIP'],['personal','Personal'],['tech','Tech / AI'],['sites','Sites']];
-  previewArea.innerHTML = `
-    <div class="preview-card">
-      <div class="preview-grid">
-        <div class="field span-2"><label>Title</label><input type="text" id="pv-title" value="${escapeHtml(parsed.title)}"></div>
-        <div class="field"><label>Category</label><select id="pv-cat">${catOptions.map(([v,l]) => `<option value="${v}|${l}" ${v===parsed.cat?'selected':''}>${l}</option>`).join('')}</select></div>
-        <div class="field"><label>Priority</label><select id="pv-pri"><option value="1" ${parsed.priority===1?'selected':''}>1 · Urgent</option><option value="2" ${parsed.priority===2?'selected':''}>2 · High</option><option value="3" ${parsed.priority===3?'selected':''}>3 · Medium</option><option value="4" ${parsed.priority===4?'selected':''}>4 · Low</option></select></div>
-        <div class="field span-2"><label>Due Date</label><input type="date" id="pv-due" value="${parsed.due||''}"></div>
-        <div class="field span-2"><label>Call to Action</label><textarea id="pv-cta">${escapeHtml(parsed.cta)}</textarea></div>
-        <div class="field span-2"><label>Notes</label><textarea id="pv-notes" placeholder="Extra context…">${escapeHtml(parsed.notes||'')}</textarea></div>
-      </div>
-      <div class="modal-actions">
-        <button class="btn-ghost" id="reParseBtn">Re-parse</button>
-        <button class="btn-primary" id="saveTaskBtn">Add to Deck</button>
-      </div>
-    </div>`;
-  document.getElementById('saveTaskBtn').addEventListener('click', saveTask);
-  document.getElementById('reParseBtn').addEventListener('click', () => { const text=brainInput.value.trim(); if (text) { parsed=parseBrainDump(text); renderPreview(); } });
-}
-function saveTask(){
-  const catVal = document.getElementById('pv-cat').value.split('|');
-  const newTask = {
-    id: uid('u'),
-    title: document.getElementById('pv-title').value.trim(),
-    cat: catVal[0], catLabel: catVal[1],
-    priority: parseInt(document.getElementById('pv-pri').value),
-    due: document.getElementById('pv-due').value || null,
-    cta: document.getElementById('pv-cta').value.trim(),
-    notes: document.getElementById('pv-notes').value.trim(),
-    custom: true,
-    people: [], attachments: []
-  };
-  if (!newTask.title) { alert('Title is required'); return; }
-  if (!newTask.cta) newTask.cta = 'Break this into 2-3 concrete next steps → execute the first one today.';
-  state.customTasks.push(newTask);
-  state.statusMap[newTask.id] = 'todo';
-  persist(); closeModal(); renderAll();
-}
-document.getElementById('fabAdd').addEventListener('click', openModal);
-document.getElementById('modalClose').addEventListener('click', closeModal);
-document.getElementById('cancelBtn').addEventListener('click', closeModal);
-modalBackdrop.addEventListener('click', e => { if (e.target === modalBackdrop) closeModal(); });
-document.addEventListener('keydown', e => {
-  if (e.key === 'Escape') {
-    if (document.getElementById('detailModal').classList.contains('open')) closeDetail();
-    else if (document.getElementById('delegateModal').classList.contains('open')) document.getElementById('delegateModal').classList.remove('open');
-    else if (modalBackdrop.classList.contains('open')) closeModal();
-  }
-});
-document.getElementById('parseBtn').addEventListener('click', () => {
-  const text = brainInput.value.trim();
-  if (!text) { brainInput.focus(); return; }
-  parsed = parseBrainDump(text); renderPreview();
-});
-
-// ============ VOICE ============
-const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
-let recognition = null;
-if (SR) {
-  recognition = new SR();
-  recognition.continuous = true; recognition.interimResults = false; recognition.lang = 'en-US';
-  recognition.onresult = e => { let txt=''; for (let i=e.resultIndex;i<e.results.length;i++) { if (e.results[i].isFinal) txt += e.results[i][0].transcript + ' '; } if (txt.trim()) brainInput.value = (brainInput.value + ' ' + txt).trim(); };
-  recognition.onend = () => document.getElementById('micBtn').classList.remove('recording');
-  recognition.onerror = () => document.getElementById('micBtn').classList.remove('recording');
-}
-document.getElementById('micBtn').addEventListener('click', () => {
-  if (!recognition) { alert('Voice input not supported. Use Chrome, Edge, or Safari.'); return; }
-  const btn = document.getElementById('micBtn');
-  if (btn.classList.contains('recording')) { try{recognition.stop();}catch(e){} btn.classList.remove('recording'); }
-  else { try{ recognition.start(); btn.classList.add('recording'); }catch(e){} }
-});
-
-// ============ INIT ============
-document.getElementById('searchBox').value = state.search || '';
-document.getElementById('sortSel').value = state.sort;
-document.querySelectorAll('#catChips .chip').forEach(c => c.classList.toggle('active', c.dataset.cat === state.filter.cat));
-document.querySelectorAll('#statusChips .chip').forEach(c => c.classList.toggle('active', c.dataset.status === state.filter.status));
-document.querySelectorAll('#viewToggle .view-btn').forEach(b => b.classList.toggle('active', b.dataset.view === state.view));
-renderAll();
-</script>
-</body>
-</html>
+  if (!t.due) { const m = lower.match(/\b(this|next)?\s*(sunday
