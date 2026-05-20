@@ -1,0 +1,451 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta name="description" content="Master Makabi's Command Deck — personal task OS with natural-language capture, smart prioritization, and voice input. Powered by LOREN AI." />
+<meta property="og:title" content="Command Deck · Master Makabi" />
+<meta property="og:description" content="A personal task OS. Capture by voice or text. Prioritized automatically." />
+<meta property="og:url" content="https://to-dos.mtip.ai/" />
+<meta property="og:type" content="website" />
+<meta name="twitter:card" content="summary_large_image" />
+<link rel="canonical" href="https://to-dos.mtip.ai/" />
+<title>Command Deck · Master Makabi</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --white: #ffffff; --surface: #f5f5f7; --surface-2: #fbfbfd;
+    --border: #d2d2d7; --border-light: #e8e8ed;
+    --text: #1d1d1f; --text-2: #424245; --muted: #6e6e73; --dim: #86868b;
+    --red: #c8102e; --red-dark: #a00d24; --red-soft: #ffe5ea;
+    --blue: #002868; --blue-soft: #e6ebf4;
+    --green: #34c759; --amber: #ff9500;
+    --shadow-xs: 0 1px 2px rgba(0,0,0,0.04);
+    --shadow-sm: 0 2px 8px rgba(0,0,0,0.05), 0 0 0 0.5px rgba(0,0,0,0.04);
+    --shadow-md: 0 8px 24px rgba(0,0,0,0.06), 0 0 0 0.5px rgba(0,0,0,0.04);
+    --shadow-lg: 0 20px 48px rgba(0,0,0,0.08), 0 0 0 0.5px rgba(0,0,0,0.04);
+    --shadow-red: 0 12px 32px rgba(200, 16, 46, 0.25);
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { background: var(--white); color: var(--text); font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Inter', system-ui, sans-serif; -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; min-height: 100vh; }
+  body { padding: 56px 32px 100px; }
+  .container { max-width: 1280px; margin: 0 auto; }
+  header { margin-bottom: 48px; }
+  .brand-row { display: flex; align-items: center; justify-content: space-between; margin-bottom: 32px; flex-wrap: wrap; gap: 16px; }
+  .brand-mark { display: flex; align-items: center; gap: 12px; font-weight: 700; font-size: 14px; letter-spacing: 0.02em; }
+  .brand-mark .flag { display: inline-flex; align-items: center; gap: 3px; }
+  .brand-mark .flag .stripe { width: 4px; height: 18px; border-radius: 1px; }
+  .brand-mark .flag .stripe.red { background: var(--red); }
+  .brand-mark .flag .stripe.white { background: var(--white); border: 1px solid var(--border); }
+  .brand-mark .flag .stripe.blue { background: var(--blue); }
+  .date-pill { display: inline-flex; align-items: center; gap: 8px; padding: 8px 16px; background: var(--surface); border: 1px solid var(--border-light); border-radius: 999px; font-size: 13px; color: var(--text-2); font-weight: 500; }
+  .date-pill .dot { width: 6px; height: 6px; background: var(--red); border-radius: 50%; }
+  .hero h1 { font-size: 88px; font-weight: 800; line-height: 0.95; letter-spacing: -0.045em; color: var(--text); }
+  .hero h1 .accent { color: var(--red); }
+  .hero .tagline { margin-top: 16px; font-size: 21px; color: var(--muted); font-weight: 400; letter-spacing: -0.01em; max-width: 720px; line-height: 1.4; }
+  @media (max-width: 700px) { .hero h1 { font-size: 56px; } .hero .tagline { font-size: 17px; } body { padding: 32px 20px 80px; } }
+  .stats { display: grid; grid-template-columns: repeat(5, 1fr); gap: 12px; margin: 48px 0 32px; }
+  @media (max-width: 900px) { .stats { grid-template-columns: repeat(2, 1fr); } }
+  .stat { background: var(--white); border: 1px solid var(--border-light); border-radius: 18px; padding: 22px 24px; box-shadow: var(--shadow-xs); transition: all 0.25s; }
+  .stat:hover { transform: translateY(-2px); box-shadow: var(--shadow-md); border-color: var(--border); }
+  .stat .num { font-size: 44px; font-weight: 700; line-height: 1; letter-spacing: -0.03em; color: var(--text); margin-bottom: 6px; }
+  .stat .lbl { font-size: 12px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted); font-weight: 600; }
+  .stat.urgent .num { color: var(--red); }
+  .stat.high .num { color: var(--blue); }
+  .stat.med .num { color: var(--text-2); }
+  .stat.done .num { color: var(--green); }
+  .controls { background: var(--white); border: 1px solid var(--border-light); border-radius: 20px; padding: 22px; margin-bottom: 28px; box-shadow: var(--shadow-xs); }
+  .controls-row { display: flex; gap: 12px; flex-wrap: wrap; align-items: center; }
+  .controls-row + .controls-row { margin-top: 14px; }
+  .search-wrap { flex: 1; min-width: 280px; position: relative; }
+  .search-wrap svg { position: absolute; left: 16px; top: 50%; transform: translateY(-50%); width: 18px; height: 18px; color: var(--dim); }
+  .search { width: 100%; padding: 13px 16px 13px 46px; background: var(--surface); border: 1px solid transparent; border-radius: 12px; color: var(--text); font-size: 15px; font-family: inherit; font-weight: 500; transition: all 0.2s; }
+  .search:focus { outline: none; background: var(--white); border-color: var(--blue); box-shadow: 0 0 0 4px rgba(0, 40, 104, 0.08); }
+  .search::placeholder { color: var(--dim); font-weight: 400; }
+  .sort-select { padding: 13px 16px; background: var(--surface); border: 1px solid transparent; border-radius: 12px; color: var(--text); font-size: 14px; font-family: inherit; font-weight: 500; cursor: pointer; min-width: 180px; appearance: none; -webkit-appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%236e6e73' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 14px center; padding-right: 36px; }
+  .sort-select:focus { outline: none; background-color: var(--white); border-color: var(--blue); }
+  .chip-row { display: flex; gap: 8px; flex-wrap: wrap; }
+  .chip { padding: 8px 16px; background: var(--surface); border: 1px solid transparent; border-radius: 999px; color: var(--text-2); font-size: 13px; font-weight: 600; cursor: pointer; transition: all 0.15s; user-select: none; letter-spacing: -0.005em; }
+  .chip:hover { background: var(--border-light); }
+  .chip.active { background: var(--text); color: var(--white); }
+  .chip .count { opacity: 0.65; margin-left: 5px; font-size: 12px; font-weight: 500; }
+  .chip.cat-money.active { background: var(--green); }
+  .chip.cat-loren.active { background: var(--blue); }
+  .chip.cat-brix.active { background: var(--text); }
+  .chip.cat-mtip.active { background: var(--red); }
+  .chip.cat-personal.active { background: #5856d6; }
+  .chip.cat-tech.active { background: var(--amber); }
+  .chip.cat-sites.active { background: var(--blue); }
+  .tasks { display: grid; grid-template-columns: repeat(auto-fill, minmax(380px, 1fr)); gap: 16px; }
+  .task { background: var(--white); border: 1px solid var(--border-light); border-radius: 18px; padding: 22px; position: relative; transition: all 0.25s ease; box-shadow: var(--shadow-xs); overflow: hidden; }
+  .task::before { content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 3px; background: var(--border); transition: all 0.25s; }
+  .task[data-priority="1"]::before { background: var(--red); }
+  .task[data-priority="2"]::before { background: var(--blue); }
+  .task[data-priority="3"]::before { background: var(--border); }
+  .task[data-priority="4"]::before { background: var(--border-light); }
+  .task:hover { transform: translateY(-3px); box-shadow: var(--shadow-md); border-color: var(--border); }
+  .task[data-priority="1"]:hover { box-shadow: 0 12px 32px rgba(200, 16, 46, 0.15), 0 0 0 0.5px var(--border); }
+  .task.done { opacity: 0.5; }
+  .task.done .task-title { text-decoration: line-through; color: var(--muted); }
+  .task.done::before { background: var(--green); }
+  .task.inprogress::before { background: var(--amber); }
+  .task-head { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; margin-bottom: 14px; }
+  .task-badges { display: flex; gap: 6px; flex-wrap: wrap; }
+  .badge { padding: 4px 10px; border-radius: 6px; font-size: 10px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; }
+  .badge.pri-1 { background: var(--red-soft); color: var(--red-dark); }
+  .badge.pri-2 { background: var(--blue-soft); color: var(--blue); }
+  .badge.pri-3 { background: var(--surface); color: var(--text-2); border: 1px solid var(--border-light); }
+  .badge.pri-4 { background: var(--surface); color: var(--muted); border: 1px solid var(--border-light); }
+  .badge.cat { background: var(--surface); color: var(--text-2); border: 1px solid var(--border-light); }
+  .badge.cat.money { color: #1d6e3f; background: #e8f7ee; border-color: transparent; }
+  .badge.cat.loren { color: var(--blue); background: var(--blue-soft); border-color: transparent; }
+  .badge.cat.brix { color: var(--text); background: var(--surface); }
+  .badge.cat.mtip { color: var(--red-dark); background: var(--red-soft); border-color: transparent; }
+  .badge.cat.personal { color: #4a48b8; background: #ebebfc; border-color: transparent; }
+  .badge.cat.tech { color: #b86a00; background: #fff3e0; border-color: transparent; }
+  .badge.cat.sites { color: var(--blue); background: var(--blue-soft); border-color: transparent; }
+  .due-pill { font-size: 12px; color: var(--muted); display: flex; align-items: center; gap: 5px; font-weight: 600; }
+  .due-pill.soon { color: var(--amber); }
+  .due-pill.urgent { color: var(--red); font-weight: 700; }
+  .task-title { font-size: 19px; font-weight: 700; line-height: 1.25; margin-bottom: 12px; letter-spacing: -0.015em; color: var(--text); }
+  .task-cta { background: var(--surface); border-left: 3px solid var(--red); padding: 12px 14px; border-radius: 0 10px 10px 0; margin-bottom: 12px; font-size: 13.5px; color: var(--text-2); line-height: 1.55; }
+  .task-cta .cta-label { font-size: 10px; letter-spacing: 0.12em; color: var(--red); text-transform: uppercase; font-weight: 700; display: block; margin-bottom: 5px; }
+  .task-notes { font-size: 12.5px; color: var(--muted); line-height: 1.55; margin-bottom: 14px; }
+  .task-actions { display: flex; gap: 6px; flex-wrap: wrap; }
+  .btn { padding: 8px 14px; background: var(--white); border: 1px solid var(--border); border-radius: 9px; color: var(--text-2); font-size: 12px; font-weight: 600; cursor: pointer; transition: all 0.15s; font-family: inherit; letter-spacing: 0.01em; }
+  .btn:hover { background: var(--surface); border-color: var(--text-2); }
+  .btn.active.btn-todo { background: var(--blue); border-color: var(--blue); color: white; }
+  .btn.active.btn-prog { background: var(--amber); border-color: var(--amber); color: white; }
+  .btn.active.btn-done { background: var(--green); border-color: var(--green); color: white; }
+  .empty { grid-column: 1 / -1; padding: 80px 20px; text-align: center; color: var(--muted); border: 1px dashed var(--border); border-radius: 18px; background: var(--surface-2); }
+  .empty h3 { font-size: 28px; font-weight: 700; margin-bottom: 8px; color: var(--text); letter-spacing: -0.02em; }
+  .fab { position: fixed; right: 32px; bottom: 32px; height: 60px; padding: 0 28px; border-radius: 999px; background: var(--red); color: var(--white); border: none; font-size: 15px; font-weight: 700; cursor: pointer; z-index: 100; box-shadow: var(--shadow-red); transition: all 0.25s ease; display: flex; align-items: center; gap: 10px; font-family: inherit; letter-spacing: -0.005em; }
+  .fab:hover { background: var(--red-dark); transform: translateY(-3px); box-shadow: 0 16px 40px rgba(200, 16, 46, 0.4); }
+  .fab:active { transform: translateY(0); }
+  .fab .plus-icon { width: 22px; height: 22px; border-radius: 50%; background: rgba(255,255,255,0.2); display: flex; align-items: center; justify-content: center; font-size: 18px; font-weight: 400; line-height: 1; }
+  .modal-backdrop { position: fixed; inset: 0; background: rgba(29, 29, 31, 0.5); backdrop-filter: blur(20px) saturate(180%); display: none; align-items: flex-start; justify-content: center; z-index: 200; padding: 60px 20px 40px; overflow-y: auto; }
+  .modal-backdrop.open { display: flex; }
+  .modal { background: var(--white); border-radius: 24px; width: 100%; max-width: 680px; padding: 32px; box-shadow: 0 32px 80px rgba(0,0,0,0.2); border: 1px solid var(--border-light); }
+  .modal-head { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 22px; }
+  .modal-head h2 { font-size: 32px; font-weight: 800; letter-spacing: -0.03em; line-height: 1.1; color: var(--text); }
+  .modal-head h2 .accent { color: var(--red); }
+  .modal-head .sub { font-size: 14px; color: var(--muted); margin-top: 6px; line-height: 1.4; }
+  .modal-close { background: var(--surface); border: none; color: var(--muted); width: 36px; height: 36px; border-radius: 50%; cursor: pointer; font-size: 16px; display: flex; align-items: center; justify-content: center; transition: all 0.15s; }
+  .modal-close:hover { background: var(--border-light); color: var(--text); }
+  .input-label { font-size: 11px; letter-spacing: 0.1em; color: var(--red); text-transform: uppercase; font-weight: 700; margin-bottom: 10px; display: block; }
+  .brain-row { position: relative; }
+  .brain-input { width: 100%; padding: 16px 60px 16px 18px; background: var(--surface); border: 1px solid transparent; border-radius: 14px; color: var(--text); font-family: inherit; font-size: 15px; line-height: 1.5; min-height: 120px; resize: vertical; font-weight: 500; transition: all 0.2s; }
+  .brain-input:focus { outline: none; background: var(--white); border-color: var(--blue); box-shadow: 0 0 0 4px rgba(0, 40, 104, 0.08); }
+  .brain-input::placeholder { color: var(--dim); font-weight: 400; font-style: italic; }
+  .mic-btn { position: absolute; right: 12px; top: 12px; width: 42px; height: 42px; border-radius: 50%; background: var(--white); border: 1px solid var(--border); color: var(--text-2); cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.15s; }
+  .mic-btn svg { width: 18px; height: 18px; }
+  .mic-btn:hover { color: var(--red); border-color: var(--red); }
+  .mic-btn.recording { background: var(--red); color: white; border-color: var(--red); animation: pulse 1.2s infinite; }
+  @keyframes pulse { 0%, 100% { box-shadow: 0 0 0 0 rgba(200, 16, 46, 0.5); } 50% { box-shadow: 0 0 0 12px rgba(200, 16, 46, 0); } }
+  .modal-actions { display: flex; gap: 10px; justify-content: flex-end; margin-top: 18px; flex-wrap: wrap; }
+  .btn-primary { padding: 12px 26px; background: var(--red); color: var(--white); border: none; border-radius: 999px; font-weight: 700; cursor: pointer; font-family: inherit; font-size: 13px; letter-spacing: 0.02em; transition: all 0.15s; }
+  .btn-primary:hover { background: var(--red-dark); transform: translateY(-1px); }
+  .btn-ghost { padding: 12px 26px; background: var(--white); color: var(--text-2); border: 1px solid var(--border); border-radius: 999px; font-weight: 700; cursor: pointer; font-family: inherit; font-size: 13px; letter-spacing: 0.02em; transition: all 0.15s; }
+  .btn-ghost:hover { background: var(--surface); color: var(--text); }
+  .preview-card { margin-top: 22px; padding: 22px; background: var(--surface-2); border-radius: 16px; border: 1px solid var(--border-light); }
+  .preview-card .pcard-head { display: flex; align-items: center; gap: 8px; margin-bottom: 16px; }
+  .preview-card .pcard-head .sparkle { color: var(--red); font-weight: 800; }
+  .preview-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+  .field { display: flex; flex-direction: column; gap: 7px; }
+  .field label { font-size: 11px; letter-spacing: 0.08em; color: var(--muted); text-transform: uppercase; font-weight: 700; }
+  .field input, .field select, .field textarea { padding: 11px 14px; background: var(--white); border: 1px solid var(--border); border-radius: 10px; color: var(--text); font-family: inherit; font-size: 14px; font-weight: 500; transition: all 0.15s; }
+  .field input:focus, .field select:focus, .field textarea:focus { outline: none; border-color: var(--blue); box-shadow: 0 0 0 3px rgba(0, 40, 104, 0.08); }
+  .field textarea { resize: vertical; min-height: 64px; line-height: 1.5; }
+  .field.span-2 { grid-column: 1 / -1; }
+  .task-del { padding: 8px 14px; background: var(--white); border: 1px solid var(--red); border-radius: 9px; color: var(--red); font-size: 12px; font-weight: 600; cursor: pointer; transition: all 0.15s; font-family: inherit; }
+  .task-del:hover { background: var(--red); color: white; }
+  .task-badge-custom { padding: 4px 10px; border-radius: 6px; font-size: 10px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; background: var(--red); color: white; }
+  footer { margin-top: 64px; padding: 32px 0 0; border-top: 1px solid var(--border-light); text-align: center; color: var(--dim); font-size: 13px; font-weight: 500; }
+  footer .powered { color: var(--red); font-weight: 700; letter-spacing: 0.03em; }
+  footer .sep { margin: 0 12px; color: var(--border); }
+  ::-webkit-scrollbar { width: 10px; }
+  ::-webkit-scrollbar-track { background: var(--surface); }
+  ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 5px; }
+  ::-webkit-scrollbar-thumb:hover { background: var(--dim); }
+</style>
+</head>
+<body>
+<div class="container">
+  <header>
+    <div class="brand-row">
+      <div class="brand-mark">
+        <span class="flag"><span class="stripe red"></span><span class="stripe white"></span><span class="stripe blue"></span></span>
+        <span>MTIP &middot; COMMAND DECK</span>
+      </div>
+      <div class="date-pill"><span class="dot"></span><span id="todayDate"></span></div>
+    </div>
+    <div class="hero">
+      <h1>Your day, <span class="accent">prioritized.</span></h1>
+      <div class="tagline">A personal task OS. Capture by voice or type. The engine ranks, schedules, and writes the call-to-action &mdash; so you can ship.</div>
+    </div>
+  </header>
+  <section class="stats">
+    <div class="stat total"><div class="num" id="stat-total">0</div><div class="lbl">Total</div></div>
+    <div class="stat urgent"><div class="num" id="stat-urgent">0</div><div class="lbl">Urgent</div></div>
+    <div class="stat high"><div class="num" id="stat-high">0</div><div class="lbl">High Priority</div></div>
+    <div class="stat med"><div class="num" id="stat-prog">0</div><div class="lbl">In Progress</div></div>
+    <div class="stat done"><div class="num" id="stat-done">0</div><div class="lbl">Closed</div></div>
+  </section>
+  <section class="controls">
+    <div class="controls-row">
+      <div class="search-wrap">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-4.35-4.35M11 18a7 7 0 100-14 7 7 0 000 14z"/></svg>
+        <input type="text" class="search" id="searchBox" placeholder="Search tasks, categories, or keywords&hellip;" />
+      </div>
+      <select class="sort-select" id="sortSel">
+        <option value="priority">Sort by Priority</option>
+        <option value="due">Sort by Due Date</option>
+        <option value="category">Sort by Category</option>
+        <option value="status">Sort by Status</option>
+        <option value="title">Sort by Title (A&ndash;Z)</option>
+      </select>
+    </div>
+    <div class="controls-row">
+      <div class="chip-row" id="catChips">
+        <div class="chip active" data-cat="all">All</div>
+        <div class="chip cat-money" data-cat="money">Money</div>
+        <div class="chip cat-loren" data-cat="loren">Loren AI</div>
+        <div class="chip cat-brix" data-cat="brix">BRiX</div>
+        <div class="chip cat-mtip" data-cat="mtip">MTIP</div>
+        <div class="chip cat-personal" data-cat="personal">Personal</div>
+        <div class="chip cat-tech" data-cat="tech">Tech / AI</div>
+        <div class="chip cat-sites" data-cat="sites">Sites</div>
+      </div>
+    </div>
+    <div class="controls-row">
+      <div class="chip-row" id="statusChips">
+        <div class="chip active" data-status="active">Active</div>
+        <div class="chip" data-status="all">Show All</div>
+        <div class="chip" data-status="todo">To Do</div>
+        <div class="chip" data-status="inprogress">In Progress</div>
+        <div class="chip" data-status="done">Done</div>
+      </div>
+    </div>
+  </section>
+  <section class="tasks" id="taskGrid"></section>
+  <footer>
+    Command Deck <span class="sep">&middot;</span> Built for Master Makabi <span class="sep">&middot;</span> <span class="powered">Powered by LOREN AI</span>
+  </footer>
+  <button class="fab" id="fabAdd" title="Add a task &mdash; type or speak">
+    <span class="plus-icon">+</span><span>Add Task</span>
+  </button>
+  <div class="modal-backdrop" id="modalBackdrop">
+    <div class="modal">
+      <div class="modal-head">
+        <div>
+          <h2>Speak it into <span class="accent">existence.</span></h2>
+          <div class="sub">Type or hit the mic. The engine parses priority, category, and dates &mdash; you confirm before it lands on the deck.</div>
+        </div>
+        <button class="modal-close" id="modalClose" title="Close">&#10005;</button>
+      </div>
+      <div>
+        <label class="input-label">What&apos;s on your mind?</label>
+        <div class="brain-row">
+          <textarea class="brain-input" id="brainInput" placeholder="e.g., 'Call Maria tomorrow about the Stripe payout &mdash; high priority' or 'Pay the AmEx by the 20th'"></textarea>
+          <button class="mic-btn" id="micBtn" title="Voice input (Chrome / Edge / Safari)">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M19 11a7 7 0 01-14 0M12 19v3m-4 0h8M12 1a3 3 0 00-3 3v7a3 3 0 006 0V4a3 3 0 00-3-3z"/></svg>
+          </button>
+        </div>
+        <div class="modal-actions">
+          <button class="btn-ghost" id="cancelBtn">Cancel</button>
+          <button class="btn-primary" id="parseBtn">Parse</button>
+        </div>
+        <div id="previewArea"></div>
+      </div>
+    </div>
+  </div>
+</div>
+<script>
+const TASKS = [
+  { id: 't01', title: "Send Hanan $300 Zelle — Mom's Mother's Day diamond studs", cat: 'personal', catLabel: 'Personal', priority: 1, due: '2026-05-13', cta: "Open Zelle → send $300 to Hanan → memo: \"Mom's diamond studs · Mother's Day reimbursement\"", notes: "Mother's Day already passed (May 10). Diamond studs shipped today — settle up immediately so it doesn't go cold." },
+  { id: 't02', title: "Pay condo mortgage", cat: 'money', catLabel: 'Money', priority: 1, due: '2026-05-15', cta: "Log into bank portal → schedule mortgage payment → confirm clearance + screenshot receipt to records", notes: "Standard monthly. Do today to avoid grace-period creep." },
+  { id: 't03', title: "Vibe board TV — $4,000 refund decision day", cat: 'money', catLabel: 'Money', priority: 1, due: '2026-05-16', cta: "Monitor Loren's Amazon inbox on the 16th → if denied, immediately escalate the A-Z claim AND file CC chargeback the same day", notes: "Highest-dollar refund in flight. Don't let the 16th pass without a response logged. Have card-issuer dispute language pre-drafted." },
+  { id: 't04', title: "Book Godspeed appointment — Shehida Nelson, Sunday 3pm ET", cat: 'loren', catLabel: 'Loren AI', priority: 1, due: '2026-05-17', cta: "Book Sun May 17, 3pm ET in Godspeed GHL calendar → send confirmation text to Shehida w/ calendar invite + Zoom/phone link", notes: "godspeedtrans subdomain is live. Owner call — high-touch, no admin delays." },
+  { id: 't05', title: "Amazon A-Z claim — $900 TV refund follow-up", cat: 'money', catLabel: 'Money', priority: 2, due: '2026-05-18', cta: "Open Amazon → A-Z Claims dashboard → reply to claim with any new evidence (timestamps, photos, comms) → push for resolution", notes: "Claim is open. Don't let it sit — reply within 48h cycles to keep it moving." },
+  { id: 't06', title: "Audit Twin.SO — pull $500 charge", cat: 'money', catLabel: 'Money', priority: 2, due: '2026-05-18', cta: "Pull last Twin.SO invoice → identify the $500 charge → email support requesting refund + cancellation if unused", notes: "If support stalls > 5 business days, chargeback via card." },
+  { id: 't07', title: "Finish Julio summary text — moving-forward terms", cat: 'brix', catLabel: 'BRiX', priority: 2, due: '2026-05-14', cta: "Open existing draft → tighten the forward-looking section → send to Julio (CEO, BRiX) and ask for acknowledgment", notes: "Direct, operator voice. No hedging. He's CEO — he needs the clean version." },
+  { id: 't08', title: "Follow up with Zoar — Olga access for Homeland Security / emergency visa", cat: 'personal', catLabel: 'Personal', priority: 2, due: '2026-05-14', cta: "Text Zoar → confirm Olga delivered the access credentials → verify emergency visa is filed or scheduled", notes: "Visa work is time-bound by definition. Don't let coordination drift." },
+  { id: 't09', title: "Finish BRiX pitch deck — verify, translate ES + HE", cat: 'brix', catLabel: 'BRiX', priority: 2, due: '2026-05-20', cta: "(1) QA English deck in Claude Design (2) Spanish translation, native financial register (3) Hebrew translation, RTL formatting (4) Format both as standalone circulars", notes: "BRiX spelling: B-R-i-X. Apply on every page. Hebrew = RTL layout — check tables, charts, footer." },
+  { id: 't10', title: "Schedule Sharon (MTIP Collective) — books review", cat: 'mtip', catLabel: 'MTIP', priority: 2, due: '2026-05-19', cta: "Text Sharon → propose 2 time slots this week → confirm and send calendar invite for a 60–90 min books + action items session", notes: "Partner sync. Bring P&L, AR aging, and the 'what we owe / what we need' list." },
+  { id: 't11', title: "Loren AI sales — fetch + line up all upcoming appointments", cat: 'loren', catLabel: 'Loren AI', priority: 2, due: '2026-05-14', cta: "Pull all upcoming appointments from Loren AI GHL sub-account → produce a one-screen brief: who, when, deal stage, ask, next step", notes: "Use ghl_list_appointments across Loren AI calendars. Build the prep brief before each call lands." },
+  { id: 't12', title: "Audit Loren AI customers — full delivery check", cat: 'loren', catLabel: 'Loren AI', priority: 2, due: '2026-05-22', cta: "Pull customer list → per client: deliverables status, open tickets, satisfaction signal → flag any gaps and assign owner", notes: "Goal: zero open delivery debts. This protects retention + makes upsell legitimate." },
+  { id: 't13', title: "Audit Loren AI outbound caller (Shalu / GHL build)", cat: 'loren', catLabel: 'Loren AI', priority: 2, due: '2026-05-21', cta: "Test the outbound caller end-to-end → review Shalu's GHL workflow → if green, design outbound campaign + budget and start deploying to leads", notes: "Once approved, this is the revenue lever. Define daily call cap, lead source, and CPL ceiling before turning it on." },
+  { id: 't14', title: "Finish autonomous agent system (Claude)", cat: 'tech', catLabel: 'Tech / AI', priority: 2, due: '2026-05-25', cta: "Resume agent build → wire SOP generators → run an end-to-end audit cycle on a real workflow to validate", notes: "Core infra. This is the multiplier for everything else on this board. Don't context-switch off it for trivia." },
+  { id: 't15', title: "Bookkeeper sit-down — household + business accounting", cat: 'personal', catLabel: 'Personal', priority: 3, due: '2026-05-23', cta: "Email bookkeeper → request 60-min strategy session for Loren + Michael combined accounting (entity flow, tax posture, reimbursements)", notes: "Bring: entity list, current rep account, any recent IRS/state correspondence." },
+  { id: 't16', title: "MTIP Pods site — full QA + lead capture", cat: 'mtip', catLabel: 'MTIP', priority: 3, due: '2026-05-24', cta: "Walk the MTIP Pods site → verify all pics + videos load → test lead form submits into GHL → confirm Powered by LOREN AI footer", notes: "Site is supposed to be feature-complete. Treat this as the go/no-go QA before driving traffic." },
+  { id: 't17', title: "Monitor onepropertymarket.com + BRiX Builders sites", cat: 'sites', catLabel: 'Sites', priority: 3, due: '2026-05-24', cta: "Visit both → screenshot current state → log bugs, content gaps, and ANY missing 'Powered by LOREN AI' footers", notes: "Active brand properties. Keep them tight and on-spec." },
+  { id: 't18', title: "Ship out the $900 all-in-one TV box", cat: 'money', catLabel: 'Money', priority: 3, due: '2026-05-20', cta: "Print return label → tape the box → schedule UPS pickup at the house OR drop off — whichever wins the day", notes: "Has to go out for the A-Z claim to fully close. Don't let it sit physically." },
+  { id: 't19', title: "Check in with Nataly — reclaimbynataly.com", cat: 'personal', catLabel: 'Personal', priority: 3, due: '2026-05-19', cta: "Call Nataly → ask status of the site + her digital wellness program → offer to unblock anything she needs (design, copy, infra)", notes: "Sister, women 40+ wellness brand. Domain is on ai-loren stack — easy lever if she needs deployment help." },
+  { id: 't20', title: "Test Manus AI vs Claude for GHL automation", cat: 'tech', catLabel: 'Tech / AI', priority: 4, due: '2026-05-30', cta: "Set up Manus AI account → run identical GHL automation tests against Claude → score on speed, quality, reliability → decide", notes: "Don't burn a week on it. Time-box to 2 hours. Either it earns a slot in the stack or it doesn't." },
+  { id: 't21', title: "Test video-intel.ai-loren.com — full QA pass", cat: 'sites', catLabel: 'Sites', priority: 2, due: '2026-05-15', cta: "Visit https://video-intel.ai-loren.com/ → walk the full user flow → test video URL ingestion + transcription path → verify Powered by LOREN AI footer → confirm Lovable badge is hidden → check favicon + OG preview → log any bugs", notes: "New subdomain on ai-loren.com stack. Run the standard deployment checklist QA — meta tags, sitemap, robots.txt, SSL, branded favicon. Add to active subdomains list once green." }
+];
+const STATE_KEY = 'mm_command_deck_state_v2';
+let state = { filter: { cat: 'all', status: 'active' }, sort: 'priority', search: '', statusMap: {}, customTasks: [] };
+try { const saved = JSON.parse(localStorage.getItem(STATE_KEY) || '{}'); state = { ...state, ...saved, filter: { ...state.filter, ...(saved.filter || {}) }, statusMap: saved.statusMap || {}, customTasks: saved.customTasks || [] }; } catch(e) {}
+function allTasks() { return [...TASKS, ...(state.customTasks || [])]; }
+allTasks().forEach(t => { if (!state.statusMap[t.id]) state.statusMap[t.id] = 'todo'; });
+function persist() { localStorage.setItem(STATE_KEY, JSON.stringify(state)); }
+const TODAY = new Date('2026-05-13T00:00:00');
+function fmtDue(iso) { if (!iso) return ''; const d = new Date(iso + 'T00:00:00'); const diff = Math.round((d - TODAY) / (1000*60*60*24)); const opts = { month: 'short', day: 'numeric' }; const dateStr = d.toLocaleDateString('en-US', opts); if (diff < 0) return `Overdue · ${dateStr}`; if (diff === 0) return `Today · ${dateStr}`; if (diff === 1) return `Tomorrow · ${dateStr}`; if (diff <= 6) return `In ${diff} days · ${dateStr}`; return dateStr; }
+function dueClass(iso) { if (!iso) return ''; const d = new Date(iso + 'T00:00:00'); const diff = Math.round((d - TODAY) / (1000*60*60*24)); if (diff <= 1) return 'urgent'; if (diff <= 4) return 'soon'; return ''; }
+document.getElementById('todayDate').textContent = TODAY.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' });
+function getStatus(t) { return state.statusMap[t.id] || 'todo'; }
+function filteredTasks() { return allTasks().filter(t => { const s = getStatus(t); if (state.filter.status === 'active' && s === 'done') return false; if (state.filter.status !== 'all' && state.filter.status !== 'active' && s !== state.filter.status) return false; if (state.filter.cat !== 'all' && t.cat !== state.filter.cat) return false; if (state.search) { const q = state.search.toLowerCase(); const hay = (t.title + ' ' + t.cta + ' ' + t.notes + ' ' + t.catLabel).toLowerCase(); if (!hay.includes(q)) return false; } return true; }); }
+function sortedTasks(list) { const arr = [...list]; const sBy = state.sort; arr.sort((a,b) => { if (sBy === 'priority') return a.priority - b.priority || (a.due||'9').localeCompare(b.due||'9'); if (sBy === 'due') return (a.due||'9').localeCompare(b.due||'9') || a.priority - b.priority; if (sBy === 'category') return a.catLabel.localeCompare(b.catLabel) || a.priority - b.priority; if (sBy === 'status') { const order = { inprogress: 0, todo: 1, done: 2 }; return order[getStatus(a)] - order[getStatus(b)] || a.priority - b.priority; } if (sBy === 'title') return a.title.localeCompare(b.title); return 0; }); return arr; }
+function priorityLabel(p) { return ['', 'URGENT', 'HIGH', 'MEDIUM', 'LOW'][p]; }
+function renderStats() { const all = allTasks(); document.getElementById('stat-total').textContent = all.length; document.getElementById('stat-urgent').textContent = all.filter(t => t.priority === 1 && getStatus(t) !== 'done').length; document.getElementById('stat-high').textContent = all.filter(t => t.priority === 2 && getStatus(t) !== 'done').length; document.getElementById('stat-prog').textContent = all.filter(t => getStatus(t) === 'inprogress').length; document.getElementById('stat-done').textContent = all.filter(t => getStatus(t) === 'done').length; }
+function renderChipCounts() { const all = allTasks(); const cats = ['all','money','loren','brix','mtip','personal','tech','sites']; const labels = { all:'All', money:'Money', loren:'Loren AI', brix:'BRiX', mtip:'MTIP', personal:'Personal', tech:'Tech / AI', sites:'Sites' }; cats.forEach(c => { const chip = document.querySelector(`#catChips .chip[data-cat="${c}"]`); if (!chip) return; const n = c === 'all' ? all.filter(t => getStatus(t) !== 'done').length : all.filter(t => t.cat === c && getStatus(t) !== 'done').length; chip.innerHTML = `${labels[c]} <span class="count">${n}</span>`; }); }
+function renderTasks() {
+  const grid = document.getElementById('taskGrid');
+  const list = sortedTasks(filteredTasks());
+  if (!list.length) { grid.innerHTML = `<div class="empty"><h3>Nothing here.</h3><div>Adjust filters or hit + to add a new task.</div></div>`; return; }
+  grid.innerHTML = list.map(t => {
+    const status = getStatus(t); const dueCls = dueClass(t.due);
+    return `
+      <div class="task ${status === 'done' ? 'done' : ''} ${status === 'inprogress' ? 'inprogress' : ''}" data-priority="${t.priority}" data-id="${t.id}">
+        <div class="task-head">
+          <div class="task-badges">
+            <span class="badge pri-${t.priority}">${priorityLabel(t.priority)}</span>
+            <span class="badge cat ${t.cat}">${t.catLabel}</span>
+            ${t.custom ? '<span class="task-badge-custom">+ Added</span>' : ''}
+          </div>
+          ${t.due ? `<div class="due-pill ${dueCls}">${fmtDue(t.due)}</div>` : ''}
+        </div>
+        <div class="task-title">${t.title}</div>
+        <div class="task-cta"><span class="cta-label">Call to Action</span>${t.cta}</div>
+        ${t.notes ? `<div class="task-notes">${t.notes}</div>` : ''}
+        <div class="task-actions">
+          <button class="btn btn-todo ${status==='todo'?'active':''}" data-act="todo">To Do</button>
+          <button class="btn btn-prog ${status==='inprogress'?'active':''}" data-act="inprogress">In Progress</button>
+          <button class="btn btn-done ${status==='done'?'active':''}" data-act="done">Done</button>
+          ${t.custom ? '<button class="task-del" data-act="delete">Remove</button>' : ''}
+        </div>
+      </div>`;
+  }).join('');
+}
+function renderAll() { renderStats(); renderChipCounts(); renderTasks(); }
+document.getElementById('searchBox').addEventListener('input', e => { state.search = e.target.value; persist(); renderTasks(); });
+document.getElementById('sortSel').addEventListener('change', e => { state.sort = e.target.value; persist(); renderTasks(); });
+document.getElementById('catChips').addEventListener('click', e => { const chip = e.target.closest('.chip'); if (!chip) return; document.querySelectorAll('#catChips .chip').forEach(c => c.classList.remove('active')); chip.classList.add('active'); state.filter.cat = chip.dataset.cat; persist(); renderAll(); });
+document.getElementById('statusChips').addEventListener('click', e => { const chip = e.target.closest('.chip'); if (!chip) return; document.querySelectorAll('#statusChips .chip').forEach(c => c.classList.remove('active')); chip.classList.add('active'); state.filter.status = chip.dataset.status; persist(); renderAll(); });
+document.getElementById('taskGrid').addEventListener('click', e => {
+  const card = e.target.closest('.task'); if (!card) return; const id = card.dataset.id;
+  const delBtn = e.target.closest('.task-del');
+  if (delBtn) { if (confirm('Remove this task permanently?')) { state.customTasks = (state.customTasks || []).filter(t => t.id !== id); delete state.statusMap[id]; persist(); renderAll(); } return; }
+  const btn = e.target.closest('.btn'); if (!btn) return; state.statusMap[id] = btn.dataset.act; persist(); renderAll();
+});
+function escapeHtml(s) { return String(s == null ? '' : s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+function isoFromDate(d) { return d.toISOString().split('T')[0]; }
+function addDays(d, n) { const r = new Date(d); r.setDate(r.getDate() + n); return r; }
+function parseBrainDump(text) {
+  const lower = text.toLowerCase();
+  const t = { title: '', cat: 'personal', catLabel: 'Personal', priority: 3, due: null, cta: '', notes: '', custom: true };
+  const catRules = [
+    { cat: 'mtip', label: 'MTIP', keys: ['mtip', 'sharon', ' pods', 'mtip collective', 'mtip cre'] },
+    { cat: 'brix', label: 'BRiX', keys: ['brix', 'julio', 'nicolas rueda', 'pitch deck'] },
+    { cat: 'loren', label: 'Loren AI', keys: ['loren ai', 'loren', 'ghl', 'gohighlevel', 'high level', 'outbound caller', 'sales call', 'shalu', 'sanjeev', 'twin.so', 'twin so', 'retell', 'elevenlabs', 'heygen', 'instantly', 'smartlead'] },
+    { cat: 'tech', label: 'Tech / AI', keys: ['autonomous agent', 'claude', 'manus', 'automation', 'mcp', 'cursor', 'lovable', ' sop ', 'playwright', 'api '] },
+    { cat: 'sites', label: 'Sites', keys: ['site', 'website', 'subdomain', 'domain', 'godaddy', 'deploy', 'landing page', 'http://', 'https://', '.com', '.ai', '.io', '.shop'] },
+    { cat: 'money', label: 'Money', keys: ['refund', 'charge', 'chargeback', 'invoice', 'pay ', 'paid', 'payment', 'mortgage', 'zelle', 'stripe', 'bill ', 'wire ', 'transaction', '$', 'dollar', 'amazon', 'a-z claim'] },
+    { cat: 'personal', label: 'Personal', keys: ['nataly', 'natalie', 'hanan', 'zoar', 'mom ', 'mother', 'wife', 'sister', 'brother', 'family', 'doctor', 'dentist', 'workout', 'gym', 'kids'] }
+  ];
+  for (const r of catRules) { if (r.keys.some(k => lower.includes(k))) { t.cat = r.cat; t.catLabel = r.label; break; } }
+  if (/(urgent|asap|immediately|right now|emergency|critical|drop everything)/i.test(text)) t.priority = 1;
+  else if (/\btoday\b/i.test(text)) t.priority = 1;
+  else if (/(high priority|important|deadline|by friday|this week|finalize|escalate)/i.test(text)) t.priority = 2;
+  else if (/(low priority|someday|eventually|when i have time|whenever|maybe|no rush)/i.test(text)) t.priority = 4;
+  else if (/(follow up|follow-up|tomorrow|next week|by the|on the)/i.test(text)) t.priority = 2;
+  const today = new Date(TODAY);
+  const dayNames = ['sunday','monday','tuesday','wednesday','thursday','friday','saturday'];
+  const monthNames = ['january','february','march','april','may','june','july','august','september','october','november','december'];
+  if (/\btoday\b/i.test(text)) t.due = isoFromDate(today);
+  else if (/\btomorrow\b/i.test(text)) t.due = isoFromDate(addDays(today, 1));
+  if (!t.due) { const m = text.match(/\bin\s+(\d+)\s+(day|days|week|weeks)\b/i); if (m) { const n = parseInt(m[1]) * (m[2].startsWith('week') ? 7 : 1); t.due = isoFromDate(addDays(today, n)); } }
+  if (!t.due) { const m = lower.match(/\b(this|next)?\s*(sunday|monday|tuesday|wednesday|thursday|friday|saturday)\b/); if (m) { const target = dayNames.indexOf(m[2]); const cur = today.getDay(); let diff = (target - cur + 7) % 7; if (diff === 0) diff = 7; if (m[1] === 'next') diff += 7; t.due = isoFromDate(addDays(today, diff)); } }
+  if (!t.due) { const m = lower.match(new RegExp(`\\b(${monthNames.join('|')})\\s+(\\d{1,2})(st|nd|rd|th)?\\b`)); if (m) { const month = monthNames.indexOf(m[1]); const day = parseInt(m[2]); const d = new Date(today.getFullYear(), month, day); if (d < today) d.setFullYear(d.getFullYear() + 1); t.due = isoFromDate(d); } }
+  if (!t.due) { const m = text.match(/\b(?:on\s+the\s+|by\s+the\s+)(\d{1,2})(st|nd|rd|th)?\b/i); if (m) { const day = parseInt(m[1]); const d = new Date(today.getFullYear(), today.getMonth(), day); if (d < today) d.setMonth(d.getMonth() + 1); t.due = isoFromDate(d); } }
+  let title = text.trim().replace(/\s+/g, ' ');
+  title = title.replace(/^(i\s+(?:need|have|want|got|gotta|should)\s+to\s+|need\s+to\s+|got\s+to\s+|gotta\s+|please\s+|remind\s+me\s+to\s+|todo[:\s]+|to-do[:\s]+)/i, '');
+  title = title.charAt(0).toUpperCase() + title.slice(1);
+  if (title.length > 140) title = title.substring(0, 137) + '...';
+  t.title = title;
+  if (/refund|chargeback|dispute/i.test(text)) t.cta = 'Pull the transaction record → contact support with proof → request refund → if denied, escalate to A-Z claim or credit-card chargeback';
+  else if (/mortgage|invoice|bill\b|payment|zelle|wire/i.test(text)) t.cta = 'Open the payment portal → submit payment → screenshot the confirmation and file it';
+  else if (/text\b|sms|message\b/i.test(text)) t.cta = 'Draft a tight message → send → log in CRM and set the next checkpoint';
+  else if (/\bcall\b|phone/i.test(text)) t.cta = 'Dial now → take notes → set the follow-up before you hang up';
+  else if (/schedule|book\b|appointment|meeting/i.test(text)) t.cta = 'Propose 2-3 time options → confirm → send calendar invite with agenda';
+  else if (/email\b/i.test(text)) t.cta = 'Draft → tighten the ask → send → log the reply expectation';
+  else if (/audit|review|check\b|qa\b/i.test(text)) t.cta = 'Walk through end-to-end → log findings + gaps → assign the next concrete step';
+  else if (/build|finish|complete|deploy|ship/i.test(text)) t.cta = 'Resume the build → finish the next milestone → ship and verify in production';
+  else if (/test\b/i.test(text)) t.cta = 'Walk the full flow → log bugs and edge cases → flag pass/fail with screenshots';
+  else if (/follow.?up/i.test(text)) t.cta = 'Pull the last contact thread → send the follow-up → log the next checkpoint';
+  else if (/translate/i.test(text)) t.cta = 'Translate in native register → preserve brand spelling (BRiX, Loren AI) → format for the target audience';
+  else if (/research|investigate/i.test(text)) t.cta = 'Frame the question → pull 3 sources → write a one-paragraph synthesis with a recommendation';
+  else t.cta = 'Break this into 2-3 concrete next steps → execute the first one today → set a checkpoint for the rest';
+  return t;
+}
+let parsed = null;
+const modalBackdrop = document.getElementById('modalBackdrop');
+const brainInput = document.getElementById('brainInput');
+const previewArea = document.getElementById('previewArea');
+function openModal() { modalBackdrop.classList.add('open'); setTimeout(() => brainInput.focus(), 50); }
+function closeModal() { modalBackdrop.classList.remove('open'); brainInput.value = ''; previewArea.innerHTML = ''; parsed = null; const mic = document.getElementById('micBtn'); if (mic.classList.contains('recording') && recognition) { try { recognition.stop(); } catch(e){} mic.classList.remove('recording'); } }
+function renderPreview() {
+  const catOptions = [['money','Money'],['loren','Loren AI'],['brix','BRiX'],['mtip','MTIP'],['personal','Personal'],['tech','Tech / AI'],['sites','Sites']];
+  previewArea.innerHTML = `
+    <div class="preview-card">
+      <div class="pcard-head"><span class="sparkle">✦</span><span class="input-label" style="margin:0;">Parsed — adjust then add</span></div>
+      <div class="preview-grid">
+        <div class="field span-2"><label>Title</label><input type="text" id="pv-title" value="${escapeHtml(parsed.title)}"></div>
+        <div class="field"><label>Category</label><select id="pv-cat">${catOptions.map(([v,l]) => `<option value="${v}|${l}" ${v === parsed.cat ? 'selected' : ''}>${l}</option>`).join('')}</select></div>
+        <div class="field"><label>Priority</label><select id="pv-pri"><option value="1" ${parsed.priority===1?'selected':''}>1 · Urgent</option><option value="2" ${parsed.priority===2?'selected':''}>2 · High</option><option value="3" ${parsed.priority===3?'selected':''}>3 · Medium</option><option value="4" ${parsed.priority===4?'selected':''}>4 · Low</option></select></div>
+        <div class="field span-2"><label>Due Date</label><input type="date" id="pv-due" value="${parsed.due || ''}"></div>
+        <div class="field span-2"><label>Call to Action</label><textarea id="pv-cta">${escapeHtml(parsed.cta)}</textarea></div>
+        <div class="field span-2"><label>Notes</label><textarea id="pv-notes" placeholder="Any extra context worth keeping…">${escapeHtml(parsed.notes || '')}</textarea></div>
+      </div>
+      <div class="modal-actions">
+        <button class="btn-ghost" id="reParseBtn">Re-parse</button>
+        <button class="btn-primary" id="saveTaskBtn">Add to Deck</button>
+      </div>
+    </div>`;
+  document.getElementById('saveTaskBtn').addEventListener('click', saveTask);
+  document.getElementById('reParseBtn').addEventListener('click', () => { const text = brainInput.value.trim(); if (text) { parsed = parseBrainDump(text); renderPreview(); } });
+}
+function saveTask() {
+  const catVal = document.getElementById('pv-cat').value.split('|');
+  const newTask = { id: 'u' + Date.now() + Math.floor(Math.random() * 1000), title: document.getElementById('pv-title').value.trim(), cat: catVal[0], catLabel: catVal[1], priority: parseInt(document.getElementById('pv-pri').value), due: document.getElementById('pv-due').value || null, cta: document.getElementById('pv-cta').value.trim(), notes: document.getElementById('pv-notes').value.trim(), custom: true };
+  if (!newTask.title) { alert('Title is required.'); return; }
+  if (!newTask.cta) newTask.cta = 'Break this into 2-3 concrete next steps → execute the first one today.';
+  state.customTasks = state.customTasks || []; state.customTasks.push(newTask); state.statusMap[newTask.id] = 'todo';
+  persist(); closeModal(); renderAll();
+}
+document.getElementById('fabAdd').addEventListener('click', openModal);
+document.getElementById('modalClose').addEventListener('click', closeModal);
+document.getElementById('cancelBtn').addEventListener('click', closeModal);
+modalBackdrop.addEventListener('click', e => { if (e.target === modalBackdrop) closeModal(); });
+document.addEventListener('keydown', e => { if (e.key === 'Escape' && modalBackdrop.classList.contains('open')) closeModal(); if ((e.metaKey || e.ctrlKey) && e.key === 'Enter' && modalBackdrop.classList.contains('open')) { if (parsed) saveTask(); else document.getElementById('parseBtn').click(); } });
+document.getElementById('parseBtn').addEventListener('click', () => { const text = brainInput.value.trim(); if (!text) { brainInput.focus(); return; } parsed = parseBrainDump(text); renderPreview(); });
+const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+let recognition = null;
+if (SR) {
+  recognition = new SR(); recognition.continuous = true; recognition.interimResults = false; recognition.lang = 'en-US';
+  recognition.onresult = (e) => { let txt = ''; for (let i = e.resultIndex; i < e.results.length; i++) { if (e.results[i].isFinal) txt += e.results[i][0].transcript + ' '; } if (txt.trim()) brainInput.value = (brainInput.value + ' ' + txt).trim(); };
+  recognition.onend = () => document.getElementById('micBtn').classList.remove('recording');
+  recognition.onerror = () => document.getElementById('micBtn').classList.remove('recording');
+}
+document.getElementById('micBtn').addEventListener('click', () => { if (!recognition) { alert('Voice input not supported in this browser. Use Chrome, Edge, or Safari.'); return; } const btn = document.getElementById('micBtn'); if (btn.classList.contains('recording')) { try { recognition.stop(); } catch(e){} btn.classList.remove('recording'); } else { try { recognition.start(); btn.classList.add('recording'); } catch(e){} } });
+document.getElementById('searchBox').value = state.search || '';
+document.getElementById('sortSel').value = state.sort;
+document.querySelectorAll('#catChips .chip').forEach(c => c.classList.toggle('active', c.dataset.cat === state.filter.cat));
+document.querySelectorAll('#statusChips .chip').forEach(c => c.classList.toggle('active', c.dataset.status === state.filter.status));
+renderAll();
+</script>
+</body>
+</html>
