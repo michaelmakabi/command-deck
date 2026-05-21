@@ -3,6 +3,10 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+<meta http-equiv="Pragma" content="no-cache" />
+<meta http-equiv="Expires" content="0" />
+<meta name="version" content="v5-2026-05-20" />
 <meta name="description" content="Master Makabi's Command Deck — personal task OS with people, attachments, Claude delegation, and live activity feeds. Powered by LOREN AI." />
 <meta property="og:title" content="Command Deck · Master Makabi" />
 <meta property="og:description" content="Personal task OS — capture, enrich, delegate, ship." />
@@ -373,8 +377,14 @@
         <span class="flag"><span class="stripe red"></span><span class="stripe white"></span><span class="stripe blue"></span></span>
         <span>MTIP &middot; COMMAND DECK</span>
       </div>
-      <div class="date-pill"><span class="dot"></span><span id="todayDate"></span></div>
+      <div style="display:flex;gap:8px;align-items:center">
+        <div class="date-pill"><span class="dot"></span><span id="todayDate"></span></div>
+        <button id="resetBtn" title="Reset deck — clears all local state and reloads with fresh data" style="background:var(--white);border:1px solid var(--border);color:var(--muted);width:32px;height:32px;border-radius:50%;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .15s" onmouseover="this.style.color='var(--red)';this.style.borderColor='var(--red)'" onmouseout="this.style.color='var(--muted)';this.style.borderColor='var(--border)'">
+          <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
+        </button>
+      </div>
     </div>
+    <div id="errBanner" style="display:none;background:#ffe5ea;border:1px solid #c8102e;color:#a00d24;padding:12px 16px;border-radius:10px;font-size:13px;margin-bottom:20px;font-weight:500"></div>
     <div class="hero">
       <h1>Your day, <span class="accent">prioritized.</span></h1>
       <div class="tagline">Capture by voice or type. Enrich with people, links, and docs. Delegate to Claude in one click &mdash; track the entire conversation in-line.</div>
@@ -444,7 +454,7 @@
   <section id="taskContainer"></section>
 
   <footer>
-    Command Deck v3 <span class="sep">&middot;</span> Built for Master Makabi <span class="sep">&middot;</span> <span class="powered">Powered by LOREN AI</span>
+    Command Deck v5 <span class="sep">&middot;</span> Built for Master Makabi <span class="sep">&middot;</span> <span class="powered">Powered by LOREN AI</span>
   </footer>
 
   <button class="fab" id="fabAdd" title="Add task"><span class="plus-icon">+</span><span>Add Task</span></button>
@@ -1489,4 +1499,95 @@ function parseBrainDump(text){
   if (/\btoday\b/i.test(text)) t.due = isoFromDate(today);
   else if (/\btomorrow\b/i.test(text)) t.due = isoFromDate(addDays(today,1));
   if (!t.due) { const m = text.match(/\bin\s+(\d+)\s+(day|days|week|weeks)\b/i); if (m) { const n = parseInt(m[1]) * (m[2].startsWith('week')?7:1); t.due = isoFromDate(addDays(today,n)); } }
-  if (!t.due) { const m = lower.match(/\b(this|next)?\s*(sunday
+  if (!t.due) { const m = lower.match(/\b(this|next)?\s*(sunday|monday|tuesday|wednesday|thursday|friday|saturday)\b/); if (m) { const target=dayNames.indexOf(m[2]); const cur=today.getDay(); let diff=(target-cur+7)%7; if (diff===0) diff=7; if (m[1]==='next') diff+=7; t.due = isoFromDate(addDays(today,diff)); } }
+  if (!t.due) { const m = lower.match(new RegExp(`\\b(${monthNames.join('|')})\\s+(\\d{1,2})(st|nd|rd|th)?\\b`)); if (m) { const month=monthNames.indexOf(m[1]); const day=parseInt(m[2]); const d=new Date(today.getFullYear(),month,day); if (d<today) d.setFullYear(d.getFullYear()+1); t.due = isoFromDate(d); } }
+  if (!t.due) { const m = text.match(/\b(?:on\s+the\s+|by\s+the\s+)(\d{1,2})(st|nd|rd|th)?\b/i); if (m) { const day=parseInt(m[1]); const d=new Date(today.getFullYear(),today.getMonth(),day); if (d<today) d.setMonth(d.getMonth()+1); t.due = isoFromDate(d); } }
+  let title = text.trim().replace(/\s+/g,' ').replace(/^(i\s+(?:need|have|want|got|gotta|should)\s+to\s+|need\s+to\s+|got\s+to\s+|gotta\s+|please\s+|remind\s+me\s+to\s+|todo[:\s]+|to-do[:\s]+)/i,'');
+  title = title.charAt(0).toUpperCase() + title.slice(1);
+  if (title.length > 140) title = title.substring(0,137)+'...';
+  t.title = title;
+  if (/refund|chargeback|dispute/i.test(text)) t.cta = 'Pull the transaction record → contact support with proof → request refund → if denied, escalate to A-Z claim or credit-card chargeback';
+  else if (/mortgage|invoice|bill\b|payment|zelle|wire/i.test(text)) t.cta = 'Open the payment portal → submit payment → screenshot the confirmation';
+  else if (/text\b|sms|message\b/i.test(text)) t.cta = 'Draft a tight message → send → log in CRM and set the next checkpoint';
+  else if (/\bcall\b|phone/i.test(text)) t.cta = 'Dial now → take notes → set the follow-up before you hang up';
+  else if (/schedule|book\b|appointment|meeting/i.test(text)) t.cta = 'Propose 2-3 time options → confirm → send calendar invite with agenda';
+  else if (/email\b/i.test(text)) t.cta = 'Draft → tighten the ask → send → log the reply expectation';
+  else if (/audit|review|check\b|qa\b/i.test(text)) t.cta = 'Walk through end-to-end → log findings + gaps → assign the next concrete step';
+  else if (/build|finish|complete|deploy|ship/i.test(text)) t.cta = 'Resume the build → finish the next milestone → ship and verify in production';
+  else if (/test\b/i.test(text)) t.cta = 'Walk the full flow → log bugs and edge cases → flag pass/fail with screenshots';
+  else if (/follow.?up/i.test(text)) t.cta = 'Pull the last contact thread → send the follow-up → log the next checkpoint';
+  else if (/translate/i.test(text)) t.cta = 'Translate in native register → preserve brand spelling (BRiX, Loren AI) → format for the target audience';
+  else t.cta = 'Break this into 2-3 concrete next steps → execute the first one today → set a checkpoint for the rest';
+  return t;
+}
+
+// ============ BRAIN DUMP MODAL ============
+let parsed = null;
+const modalBackdrop = document.getElementById('modalBackdrop');
+const brainInput = document.getElementById('brainInput');
+const previewArea = document.getElementById('previewArea');
+function openModal(){ modalBackdrop.classList.add('open'); setTimeout(() => brainInput.focus(), 50); }
+function closeModal(){ modalBackdrop.classList.remove('open'); brainInput.value=''; previewArea.innerHTML=''; parsed=null; const mic=document.getElementById('micBtn'); if (mic.classList.contains('recording') && recognition) { try{recognition.stop();}catch(e){} mic.classList.remove('recording'); } }
+function renderPreview(){
+  const catOptions = [['money','Money'],['loren','Loren AI'],['brix','BRiX'],['mtip','MTIP'],['personal','Personal'],['tech','Tech / AI'],['sites','Sites']];
+  previewArea.innerHTML = `
+    <div class="preview-card">
+      <div class="preview-grid">
+        <div class="field span-2"><label>Title</label><input type="text" id="pv-title" value="${escapeHtml(parsed.title)}"></div>
+        <div class="field"><label>Category</label><select id="pv-cat">${catOptions.map(([v,l]) => `<option value="${v}|${l}" ${v===parsed.cat?'selected':''}>${l}</option>`).join('')}</select></div>
+        <div class="field"><label>Priority</label><select id="pv-pri"><option value="1" ${parsed.priority===1?'selected':''}>1 · Urgent</option><option value="2" ${parsed.priority===2?'selected':''}>2 · High</option><option value="3" ${parsed.priority===3?'selected':''}>3 · Medium</option><option value="4" ${parsed.priority===4?'selected':''}>4 · Low</option></select></div>
+        <div class="field span-2"><label>Due Date</label><input type="date" id="pv-due" value="${parsed.due||''}"></div>
+        <div class="field span-2"><label>Call to Action</label><textarea id="pv-cta">${escapeHtml(parsed.cta)}</textarea></div>
+        <div class="field span-2"><label>Notes</label><textarea id="pv-notes" placeholder="Extra context…">${escapeHtml(parsed.notes||'')}</textarea></div>
+      </div>
+      <div class="modal-actions">
+        <button class="btn-ghost" id="reParseBtn">Re-parse</button>
+        <button class="btn-primary" id="saveTaskBtn">Add to Deck</button>
+      </div>
+    </div>`;
+  document.getElementById('saveTaskBtn').addEventListener('click', saveTask);
+  document.getElementById('reParseBtn').addEventListener('click', () => { const text=brainInput.value.trim(); if (text) { parsed=parseBrainDump(text); renderPreview(); } });
+}
+function saveTask(){
+  const catVal = document.getElementById('pv-cat').value.split('|');
+  const newTask = {
+    id: uid('u'),
+    title: document.getElementById('pv-title').value.trim(),
+    cat: catVal[0], catLabel: catVal[1],
+    priority: parseInt(document.getElementById('pv-pri').value),
+    due: document.getElementById('pv-due').value || null,
+    cta: document.getElementById('pv-cta').value.trim(),
+    notes: document.getElementById('pv-notes').value.trim(),
+    custom: true,
+    people: [], attachments: []
+  };
+  if (!newTask.title) { alert('Title is required'); return; }
+  if (!newTask.cta) newTask.cta = 'Break this into 2-3 concrete next steps → execute the first one today.';
+  state.customTasks.push(newTask);
+  state.statusMap[newTask.id] = 'todo';
+  persist(); closeModal(); renderAll();
+}
+document.getElementById('fabAdd').addEventListener('click', openModal);
+document.getElementById('modalClose').addEventListener('click', closeModal);
+document.getElementById('cancelBtn').addEventListener('click', closeModal);
+modalBackdrop.addEventListener('click', e => { if (e.target === modalBackdrop) closeModal(); });
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') {
+    if (document.getElementById('detailModal').classList.contains('open')) closeDetail();
+    else if (document.getElementById('delegateModal').classList.contains('open')) document.getElementById('delegateModal').classList.remove('open');
+    else if (modalBackdrop.classList.contains('open')) closeModal();
+  }
+});
+document.getElementById('parseBtn').addEventListener('click', () => {
+  const text = brainInput.value.trim();
+  if (!text) { brainInput.focus(); return; }
+  parsed = parseBrainDump(text); renderPreview();
+});
+
+// ============ VOICE ============
+const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+let recognition = null;
+if (SR) {
+  recognition = new SR();
+  recognition.continuous = true; recognition.interimResults = false; recognition.lang = 'en-US';
+  recognition.onresult = e => { let txt=''; for (let i=e.resultIndex;i<e.results.length;i++) { if (e.results[i].isFinal) txt += e.results[i][0].transcript + ' '; } if (txt.trim(
