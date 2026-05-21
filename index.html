@@ -1590,4 +1590,54 @@ let recognition = null;
 if (SR) {
   recognition = new SR();
   recognition.continuous = true; recognition.interimResults = false; recognition.lang = 'en-US';
-  recognition.onresult = e => { let txt=''; for (let i=e.resultIndex;i<e.results.length;i++) { if (e.results[i].isFinal) txt += e.results[i][0].transcript + ' '; } if (txt.trim(
+  recognition.onresult = e => { let txt=''; for (let i=e.resultIndex;i<e.results.length;i++) { if (e.results[i].isFinal) txt += e.results[i][0].transcript + ' '; } if (txt.trim()) brainInput.value = (brainInput.value + ' ' + txt).trim(); };
+  recognition.onend = () => document.getElementById('micBtn').classList.remove('recording');
+  recognition.onerror = () => document.getElementById('micBtn').classList.remove('recording');
+}
+document.getElementById('micBtn').addEventListener('click', () => {
+  if (!recognition) { alert('Voice input not supported. Use Chrome, Edge, or Safari.'); return; }
+  const btn = document.getElementById('micBtn');
+  if (btn.classList.contains('recording')) { try{recognition.stop();}catch(e){} btn.classList.remove('recording'); }
+  else { try{ recognition.start(); btn.classList.add('recording'); }catch(e){} }
+});
+
+// ============ ERROR BANNER + RESET ============
+function showError(msg) {
+  const b = document.getElementById('errBanner');
+  if (!b) return;
+  b.textContent = msg;
+  b.style.display = 'block';
+}
+window.addEventListener('error', e => {
+  showError('JS error: ' + e.message + ' (line ' + e.lineno + ') -- try clicking the Reset button next to the date.');
+  console.error('Command Deck error:', e);
+});
+document.getElementById('resetBtn').addEventListener('click', () => {
+  if (!confirm('Reset Command Deck?\n\nThis clears all your custom tasks, edits, attachments, people, and activity logs from this browser. The 21 default tasks come back fresh. Cannot be undone.')) return;
+  try { localStorage.removeItem(STATE_KEY); } catch(e){}
+  location.reload();
+});
+
+// ============ INIT (defensive wrapper) ============
+try {
+  document.getElementById('searchBox').value = state.search || '';
+  document.getElementById('sortSel').value = state.sort;
+  document.querySelectorAll('#catChips .chip').forEach(c => c.classList.toggle('active', c.dataset.cat === state.filter.cat));
+  document.querySelectorAll('#statusChips .chip').forEach(c => c.classList.toggle('active', c.dataset.status === state.filter.status));
+  document.querySelectorAll('#viewToggle .view-btn').forEach(b => b.classList.toggle('active', b.dataset.view === state.view));
+  renderAll();
+} catch(e) {
+  console.error('Init failed:', e);
+  showError('Init failed: ' + e.message + ' -- your saved state may be corrupt. Click the Reset button next to the date.');
+  try {
+    state = { filter:{cat:'all',status:'active'}, sort:'priority', search:'', view:'card', statusMap:{}, customTasks:[], enrichments:{}, tableColumns: DEFAULT_TABLE_COLS.slice(), tableSort:{col:'priority',dir:'asc'} };
+    allTasks().forEach(t => { state.statusMap[t.id] = 'todo'; });
+    renderAll();
+  } catch(e2) {
+    console.error('Recovery render also failed:', e2);
+    showError('Recovery failed too. Click Reset.');
+  }
+}
+</script>
+</body>
+</html>
