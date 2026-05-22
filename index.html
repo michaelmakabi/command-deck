@@ -6,7 +6,7 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
 <meta http-equiv="Pragma" content="no-cache" />
 <meta http-equiv="Expires" content="0" />
-<meta name="version" content="v5-2026-05-20" />
+<meta name="version" content="v6-notes-2026-05-22" />
 <meta name="description" content="Master Makabi's Command Deck — personal task OS with people, attachments, Claude delegation, and live activity feeds. Powered by LOREN AI." />
 <meta property="og:title" content="Command Deck · Master Makabi" />
 <meta property="og:description" content="Personal task OS — capture, enrich, delegate, ship." />
@@ -344,6 +344,35 @@
   .log-send:hover{background:var(--red-dark)}
   .log-author-select{position:absolute;right:74px;bottom:8px;padding:7px 8px;background:var(--white);border:1px solid var(--border);border-radius:8px;font-size:11px;font-weight:600;cursor:pointer;font-family:inherit;appearance:none;-webkit-appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='10' viewBox='0 0 24 24' fill='none' stroke='%236e6e73' stroke-width='2.5'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 6px center;padding-right:22px}
 
+  /* NOTES ARCHIVE */
+  .notes-feed{display:flex;flex-direction:column;gap:10px;margin-bottom:14px;max-height:440px;overflow-y:auto}
+  .note-card{display:flex;gap:12px;padding:14px;background:#fffdf5;border:1px solid #f5e9c4;border-radius:12px;position:relative;transition:box-shadow .15s}
+  .note-card:hover{box-shadow:0 2px 8px rgba(0,0,0,.04)}
+  .note-card:hover .note-del{opacity:1}
+  .note-avatar{width:34px;height:34px;border-radius:50%;background:linear-gradient(135deg,var(--red),var(--blue));color:#fff;font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;letter-spacing:-.3px}
+  .note-body{flex:1;min-width:0}
+  .note-meta{display:flex;justify-content:space-between;align-items:center;margin-bottom:5px;gap:8px;flex-wrap:wrap}
+  .note-author{font-size:12.5px;font-weight:700;color:var(--text)}
+  .note-time{font-size:11px;color:var(--muted);font-variant-numeric:tabular-nums}
+  .note-text{font-size:13.5px;color:var(--text-2);line-height:1.55;white-space:pre-wrap;word-wrap:break-word}
+  .note-del{position:absolute;top:8px;right:8px;background:transparent;border:none;color:var(--muted);cursor:pointer;padding:5px;border-radius:6px;opacity:0;transition:all .15s;display:flex;align-items:center;justify-content:center}
+  .note-del:hover{background:#fee;color:var(--red)}
+  .note-composer{display:flex;flex-direction:column;gap:10px;padding:14px;background:var(--surface);border-radius:12px;border:1px solid var(--border-light)}
+  .note-composer-top{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+  .note-author-label{font-size:10.5px;color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:.6px}
+  .note-author-input{flex:1;min-width:160px;max-width:280px;padding:8px 11px;background:var(--white);border:1px solid var(--border);border-radius:8px;font-size:12.5px;font-weight:600;color:var(--text);font-family:inherit}
+  .note-author-input:focus{outline:none;border-color:var(--blue);box-shadow:0 0 0 2px rgba(0,40,104,.08)}
+  .note-input{width:100%;padding:12px 13px;background:var(--white);border:1px solid var(--border);border-radius:10px;font-family:inherit;font-size:13.5px;color:var(--text);resize:vertical;min-height:84px;line-height:1.5;font-weight:500;box-sizing:border-box}
+  .note-input:focus{outline:none;border-color:var(--blue);box-shadow:0 0 0 3px rgba(0,40,104,.08)}
+  .note-input::placeholder{color:var(--dim);font-style:italic}
+  .note-actions{display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap}
+  .note-hint{font-size:11px;color:var(--muted)}
+  .note-hint kbd{display:inline-block;padding:1px 5px;background:var(--white);border:1px solid var(--border);border-radius:4px;font-family:'SF Mono','Monaco',monospace;font-size:10px;color:var(--text-2)}
+  .note-post-btn{padding:9px 20px;background:var(--blue);color:#fff;border:none;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;transition:background .15s}
+  .note-post-btn:hover{background:#001f50}
+  .note-post-btn:disabled{background:var(--muted);cursor:not-allowed}
+  .notes-empty{color:var(--muted);font-size:13px;padding:22px 18px;text-align:center;background:var(--surface);border-radius:10px;border:1px dashed var(--border-light)}
+
   /* DETAIL FOOTER */
   .detail-foot{padding:18px 28px;border-top:1px solid var(--border-light);display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;background:var(--surface-2);flex-shrink:0}
   .detail-status-row{display:flex;gap:6px;flex-wrap:wrap}
@@ -454,7 +483,7 @@
   <section id="taskContainer"></section>
 
   <footer>
-    Command Deck v5 <span class="sep">&middot;</span> Built for Master Makabi <span class="sep">&middot;</span> <span class="powered">Powered by LOREN AI</span>
+    Command Deck v6 <span class="sep">&middot;</span> Built for Master Makabi <span class="sep">&middot;</span> <span class="powered">Powered by LOREN AI</span>
   </footer>
 
   <button class="fab" id="fabAdd" title="Add task"><span class="plus-icon">+</span><span>Add Task</span></button>
@@ -496,6 +525,7 @@
       </div>
       <div class="detail-tabs">
         <button class="detail-tab active" data-section="overview">Overview</button>
+        <button class="detail-tab" data-section="notes">Notes <span class="tab-count" id="cnt-notes">0</span></button>
         <button class="detail-tab" data-section="people">People <span class="tab-count" id="cnt-people">0</span></button>
         <button class="detail-tab" data-section="attachments">Attachments <span class="tab-count" id="cnt-attach">0</span></button>
         <button class="detail-tab" data-section="log">Activity <span class="tab-count" id="cnt-log">0</span></button>
@@ -634,7 +664,8 @@ let state = {
   customTasks:[],
   enrichments:{},
   tableColumns: DEFAULT_TABLE_COLS.slice(),
-  tableSort: { col:'priority', dir:'asc' }
+  tableSort: { col:'priority', dir:'asc' },
+  lastNoteAuthor: 'Master Makabi'
 };
 try {
   const saved = JSON.parse(localStorage.getItem(STATE_KEY) || '{}');
@@ -667,7 +698,8 @@ function getTask(id) {
     catLabel: enr.catLabel ?? base.catLabel,
     people: enr.people || base.people || [],
     attachments: enr.attachments || base.attachments || [],
-    log: enr.log || []
+    log: enr.log || [],
+    notes_feed: enr.notes_feed || []
   };
 }
 function getEnr(id) {
@@ -752,7 +784,8 @@ function filteredTasks(){
       const ppl = (t.people||[]).map(p => p.name+' '+p.role).join(' ');
       const att = (t.attachments||[]).map(a => a.title+' '+(a.url||'')).join(' ');
       const lg = (t.log||[]).map(l => l.text).join(' ');
-      const hay = (t.title+' '+t.cta+' '+t.notes+' '+t.catLabel+' '+ppl+' '+att+' '+lg).toLowerCase();
+      const nf = (t.notes_feed||[]).map(n => (n.author||'')+' '+(n.text||'')).join(' ');
+      const hay = (t.title+' '+t.cta+' '+t.notes+' '+t.catLabel+' '+ppl+' '+att+' '+lg+' '+nf).toLowerCase();
       if (!hay.includes(q)) return false;
     }
     return true;
@@ -1057,6 +1090,7 @@ function renderDetail(){
   document.getElementById('cnt-people').textContent = (t.people||[]).length;
   document.getElementById('cnt-attach').textContent = (t.attachments||[]).length;
   document.getElementById('cnt-log').textContent = (t.log||[]).length;
+  const cntNotes = document.getElementById('cnt-notes'); if (cntNotes) cntNotes.textContent = (t.notes_feed||[]).length;
   // Status footer
   document.getElementById('detailStatusRow').innerHTML = `
     <button class="btn ${status==='todo'?'active btn-todo':''}" data-act="todo">To Do</button>
@@ -1067,9 +1101,81 @@ function renderDetail(){
   // Body
   const body = document.getElementById('detailBody');
   if (activeSection === 'overview') body.innerHTML = renderOverviewSection(t);
+  else if (activeSection === 'notes') body.innerHTML = renderNotesSection(t);
   else if (activeSection === 'people') body.innerHTML = renderPeopleSection(t);
   else if (activeSection === 'attachments') body.innerHTML = renderAttachmentsSection(t);
   else if (activeSection === 'log') body.innerHTML = renderLogSection(t);
+}
+
+function renderNotesSection(t){
+  const notes = (t.notes_feed||[]).slice().sort((a,b)=>(b.ts||'').localeCompare(a.ts||''));
+  const lastAuthor = state.lastNoteAuthor || 'Master Makabi';
+  return `
+    <h3>Notes <span class="helper">Timestamped archive &mdash; every post is logged with author + time, immutable once published</span></h3>
+    <div class="note-composer">
+      <div class="note-composer-top">
+        <span class="note-author-label">Author</span>
+        <input type="text" class="note-author-input" id="noteAuthor" value="${escapeHtml(lastAuthor)}" placeholder="Your name" autocomplete="off" />
+      </div>
+      <textarea class="note-input" id="noteInput" placeholder="Drop a note &mdash; context, decision, status update, follow-up&hellip;"></textarea>
+      <div class="note-actions">
+        <span class="note-hint"><kbd>Cmd</kbd>+<kbd>Enter</kbd> to post &middot; notes are immutable after posting</span>
+        <button class="note-post-btn" id="notePost">Post Note</button>
+      </div>
+    </div>
+    <div class="notes-feed" style="margin-top:16px">
+      ${notes.length===0 ? '<div class="notes-empty">No notes yet. Drop the first one above to start the archive.</div>' :
+        notes.map(n => `
+        <div class="note-card" data-nid="${n.id}">
+          <div class="note-avatar" style="background:${noteAvatarBg(n.author)}">${initials(n.author||'?')}</div>
+          <div class="note-body">
+            <div class="note-meta">
+              <span class="note-author">${escapeHtml(n.author||'Unknown')}</span>
+              <span class="note-time" title="${escapeHtml(n.ts||'')}">${fmtNoteTime(n.ts)}</span>
+            </div>
+            <div class="note-text">${escapeHtml(n.text)}</div>
+          </div>
+          <button class="note-del" data-nid="${n.id}" data-act="del-note" title="Delete note"><svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" d="M6 18L18 6M6 6l12 12"/></svg></button>
+        </div>
+      `).join('')}
+    </div>
+  `;
+}
+
+function fmtNoteTime(iso){
+  if (!iso) return '';
+  const d = new Date(iso);
+  if (isNaN(d.getTime())) return '';
+  const now = new Date();
+  const sameDay = d.toDateString() === now.toDateString();
+  const sameYear = d.getFullYear() === now.getFullYear();
+  const time = d.toLocaleString('en-US', { hour:'numeric', minute:'2-digit' });
+  if (sameDay) return `Today &middot; ${time}`;
+  const datePart = d.toLocaleString('en-US', sameYear ? { month:'short', day:'numeric' } : { month:'short', day:'numeric', year:'numeric' });
+  return `${datePart} &middot; ${time}`;
+}
+
+function noteAvatarBg(name){
+  if (!name) return 'linear-gradient(135deg,var(--red),var(--blue))';
+  const n = name.toLowerCase();
+  if (n.includes('claude')) return 'linear-gradient(135deg,#b85cff,#0057ff)';
+  if (n.includes('makabi') || n.includes('master') || n === 'me' || n.includes('michael')) return 'linear-gradient(135deg,#ff3838,#002868)';
+  if (n.includes('loren')) return 'linear-gradient(135deg,#ff7a59,#ffb86b)';
+  if (n.includes('julio')) return 'linear-gradient(135deg,#00b894,#00997a)';
+  if (n.includes('nicolas') || n.includes('rueda')) return 'linear-gradient(135deg,#0096ff,#0057ff)';
+  if (n.includes('sanjeev') || n.includes('shalu')) return 'linear-gradient(135deg,#9b59b6,#6c5ce7)';
+  if (n.includes('nataly')) return 'linear-gradient(135deg,#ff5e9c,#c44d8c)';
+  const palette = ['#ff4444,#cc2222','#0057ff,#003a99','#00b894,#00997a','#9b59b6,#6c5ce7','#ff7a59,#cc4422','#0096ff,#0057ff'];
+  const sum = [...name].reduce((a,c)=>a+c.charCodeAt(0),0);
+  return `linear-gradient(135deg,${palette[sum % palette.length]})`;
+}
+
+function postNote(id, author, text){
+  const enr = getEnr(id);
+  if (!enr.notes_feed) enr.notes_feed = [];
+  enr.notes_feed.push({ id:uid('n'), ts:NOW_ISO(), author:author||'Unknown', text });
+  state.lastNoteAuthor = author;
+  persist();
 }
 
 function renderOverviewSection(t){
@@ -1238,6 +1344,7 @@ document.getElementById('detailBody').addEventListener('input', e => {
   const id = e.target.id;
   if (id === 'det-cta') updateTaskField(activeDetailId, 'cta', e.target.value);
   else if (id === 'det-notes') updateTaskField(activeDetailId, 'notes', e.target.value);
+  else if (id === 'noteAuthor') { state.lastNoteAuthor = e.target.value.trim() || 'Master Makabi'; persist(); }
 });
 document.getElementById('detailBody').addEventListener('change', e => {
   if (!activeDetailId) return;
@@ -1293,6 +1400,42 @@ document.getElementById('detailBody').addEventListener('click', e => {
     if (!text) return;
     const author = document.getElementById('logAuthor').value;
     addLog(activeDetailId, author, text);
+    renderDetail();
+  }
+  // Post note to archive
+  if (e.target.id === 'notePost' || (e.target.closest && e.target.closest('#notePost'))) {
+    const inp = document.getElementById('noteInput');
+    const ai = document.getElementById('noteAuthor');
+    if (!inp || !ai) return;
+    const text = inp.value.trim();
+    if (!text) { toast('Type a note first.'); return; }
+    const author = ai.value.trim() || 'Master Makabi';
+    postNote(activeDetailId, author, text);
+    toast('Note posted — archived with timestamp');
+    renderDetail();
+  }
+  // Delete a note from archive
+  const delNoteBtn = e.target.closest && e.target.closest('[data-act="del-note"]');
+  if (delNoteBtn) {
+    if (!confirm('Delete this note from the archive? This cannot be undone.')) return;
+    const enr = getEnr(activeDetailId);
+    if (enr.notes_feed) {
+      const idx = enr.notes_feed.findIndex(n => n.id === delNoteBtn.dataset.nid);
+      if (idx >= 0) { enr.notes_feed.splice(idx,1); persist(); renderDetail(); toast('Note removed'); }
+    }
+  }
+});
+
+// Cmd/Ctrl+Enter posts a note from the composer
+document.getElementById('detailBody').addEventListener('keydown', e => {
+  if (e.target.id === 'noteInput' && (e.metaKey || e.ctrlKey) && e.key === 'Enter') {
+    e.preventDefault();
+    const text = e.target.value.trim();
+    if (!text || !activeDetailId) return;
+    const ai = document.getElementById('noteAuthor');
+    const author = ((ai && ai.value) || '').trim() || 'Master Makabi';
+    postNote(activeDetailId, author, text);
+    toast('Note posted — archived with timestamp');
     renderDetail();
   }
 });
@@ -1387,6 +1530,7 @@ function buildDelegationPrompt(t){
     return `- [${a.type}${a.kind?'/'+a.kind:''}] ${a.title} — ${a.url}`;
   }).join('\n') || '(none)';
   const log = (t.log||[]).slice(-5).map(l => `[${fmtTime(l.ts)}] ${l.author==='claude'?'Claude':l.author==='system'?'System':'Me'}: ${l.text}`).join('\n') || '(no prior activity)';
+  const archiveNotes = (t.notes_feed||[]).slice().sort((a,b)=>(b.ts||'').localeCompare(a.ts||'')).slice(0,8).map(n => `[${fmtTime(n.ts)}] ${n.author||'Unknown'}: ${n.text}`).join('\n') || '(no archived notes)';
   return `# Task Delegation from Command Deck
 
 **Task:** ${t.title}
@@ -1400,6 +1544,9 @@ ${t.cta}
 
 ## Notes
 ${t.notes || '(no notes)'}
+
+## Notes archive (most recent 8 — author + timestamp)
+${archiveNotes}
 
 ## People involved
 ${people}
