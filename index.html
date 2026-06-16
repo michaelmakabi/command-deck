@@ -667,8 +667,24 @@ let state = {
   tableSort: { col:'priority', dir:'asc' },
   lastNoteAuthor: 'Master Makabi'
 };
+function loadSavedState() {
+  // Prefer the current storage-version key
+  const cur = localStorage.getItem(STATE_KEY);
+  if (cur) { try { const p = JSON.parse(cur); if (p) return p; } catch(e){} }
+  // No current state — migrate the most recent prior version so statuses never
+  // reset to "To Do" when the storage-version key is bumped (e.g. v2 -> v3).
+  let best = null, bestVer = -1;
+  for (let i = 0; i < localStorage.length; i++) {
+    const k = localStorage.key(i);
+    const m = k && k.match(/^mm_command_deck_state_v(\d+)$/);
+    if (m && parseInt(m[1], 10) > bestVer) {
+      try { const p = JSON.parse(localStorage.getItem(k)); if (p) { best = p; bestVer = parseInt(m[1], 10); } } catch(e){}
+    }
+  }
+  return best || {};
+}
 try {
-  const saved = JSON.parse(localStorage.getItem(STATE_KEY) || '{}');
+  const saved = loadSavedState();
   state = { ...state, ...saved,
     filter:{ ...state.filter, ...(saved.filter||{}) },
     statusMap:saved.statusMap||{},
@@ -680,6 +696,7 @@ try {
 
 function allTasks() { return [...TASKS, ...(state.customTasks||[])]; }
 allTasks().forEach(t => { if (!state.statusMap[t.id]) state.statusMap[t.id]='todo'; });
+persist(); // write migrated/defaulted state under the current key so it sticks across refreshes
 function persist() { try{ localStorage.setItem(STATE_KEY, JSON.stringify(state)); }catch(e){ toast('Storage full — remove some attachments'); } }
 
 // Get task with enrichments applied
